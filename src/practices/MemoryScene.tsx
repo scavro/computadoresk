@@ -114,12 +114,12 @@ export default function MemoryScene({ groups, chipsPerGroup, selectedGroup }: Me
       groupMesh.position.set(0, .35, groupZ(group));
       const selected = group === selectedGroup;
       for (let chip = 0; chip < safeChips; chip++) {
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(.95, .4, .7), new THREE.MeshStandardMaterial({ color: selected ? '#d45b42' : '#5b7c99', roughness: .38, metalness: .22, emissive: selected ? '#5a1f16' : '#000000', emissiveIntensity: selected ? .35 : 0 }));
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(.95, .4, .7), new THREE.MeshStandardMaterial({ color: selected ? '#b84635' : '#6b8fae', roughness: .38, metalness: .22, emissive: selected ? '#963426' : '#10283c', emissiveIntensity: selected ? .35 : 0 }));
         mesh.position.set(chipX(chip), .2, 0);
         mesh.castShadow = true;
         groupMesh.add(mesh);
       }
-      const base = new THREE.Mesh(new THREE.BoxGeometry(safeChips * 1.1 + .2, .08, .9), new THREE.MeshStandardMaterial({ color: selected ? '#c7a154' : '#23405a', roughness: .7 }));
+      const base = new THREE.Mesh(new THREE.BoxGeometry(safeChips * 1.1 + .2, .08, .9), new THREE.MeshStandardMaterial({ color: selected ? '#c7a154' : '#244a69', roughness: .7 }));
       base.position.set(safeChips * .5 + .05, -.05, 0);
       groupMesh.add(base);
       scene.add(groupMesh);

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { BookOpen, Github, Menu, Search, X } from 'lucide-react';
+import { BookOpen, Github, Menu, Moon, Search, Sun, X } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const links = [
   { to: '/temas/1', label: 'Apuntes' },
@@ -11,6 +12,7 @@ const links = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const { theme, toggle } = useTheme();
 
   return (
     <header className="site-header">
@@ -27,6 +29,7 @@ export function Header() {
         <NavLink to="/guia" onClick={() => setOpen(false)}>Guía</NavLink>
       </nav>
       <div className="header-actions">
+        <button className="icon-button theme-toggle" type="button" onClick={toggle} aria-label={theme === 'light' ? 'Activar modo oscuro' : 'Activar modo claro'}>{theme === 'light' ? <Moon size={19} /> : <Sun size={19} />}</button>
         <Link className="icon-button" to="/buscar" aria-label="Buscar en el curso"><Search size={19} /></Link>
         <a className="icon-button github-link" href="https://github.com/scavro/computadoresk" target="_blank" rel="noreferrer" aria-label="Repositorio en GitHub"><Github size={19} /></a>
         <button className="icon-button menu-button" type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={open ? 'Cerrar menú' : 'Abrir menú'}>

@@ -27,6 +27,16 @@ typography:
     fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.72
+  nav:
+    fontFamily: "Barlow Condensed, sans-serif"
+    fontSize: "1.125rem"
+    fontWeight: 600
+    lineHeight: 1
+  title:
+    fontFamily: "Barlow Condensed, sans-serif"
+    fontSize: "1.625rem"
+    fontWeight: 700
+    lineHeight: 1
   label:
     fontFamily: "Azeret Mono Variable, monospace"
     fontSize: "0.625rem"

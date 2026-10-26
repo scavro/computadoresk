@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { CourseProvider } from './context/CourseContext';
 import { ProgressProvider } from './context/ProgressContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
@@ -58,11 +59,13 @@ function AppRoutes() {
 export default function App() {
   return (
     <HashRouter>
-      <CourseProvider>
-        <ProgressProvider>
-          <AppRoutes />
-        </ProgressProvider>
-      </CourseProvider>
+      <ThemeProvider>
+        <CourseProvider>
+          <ProgressProvider>
+            <AppRoutes />
+          </ProgressProvider>
+        </CourseProvider>
+      </ThemeProvider>
     </HashRouter>
   );
 }
