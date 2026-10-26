@@ -2,7 +2,7 @@
 
 Web local de estudio para la asignatura **Fundamentos de Computadores (7103104-)** del Grado en Ingeniería en Inteligencia Artificial de la UNED.
 
-El proyecto se encuentra en fase de planificación. La aplicación todavía no está implementada.
+La primera versión funcional está implementada: apuntes, ejercicios, examen, prácticas y progreso local.
 
 ## Contenido previsto
 
@@ -23,8 +23,6 @@ Consulta el plan completo en [PLAN.md](PLAN.md).
 
 ## Puesta en marcha
 
-Cuando la aplicación esté implementada:
-
 ```bash
 npm install
 npm run dev
@@ -35,11 +33,12 @@ La dirección local aparecerá en la terminal, normalmente `http://localhost:517
 ## Comandos previstos
 
 ```bash
-npm run dev      # Servidor local
-npm run build    # Compilación de producción
-npm run preview  # Vista previa de la compilación
-npm run test     # Pruebas
-npm run lint     # Comprobaciones de código
+npm run dev            # Servidor local
+npm run build          # Compilación de producción
+npm run preview        # Vista previa de la compilación
+npm run test           # Pruebas
+npm run lint           # Comprobaciones de código
+npm run content:extract # Regenera el contenido local desde los PDF originales
 ```
 
 ## Estructura
@@ -54,12 +53,12 @@ Los apuntes, ejercicios y soluciones originales pertenecen a sus autores y a la 
 
 - [x] Planificación inicial.
 - [x] Repositorio Git preparado.
-- [ ] Fase 1: base de la aplicación.
-- [ ] Fase 2: apuntes.
-- [ ] Fase 3: ejercicios existentes.
-- [ ] Fase 4: banco de examen.
-- [ ] Fase 5: prácticas interactivas.
-- [ ] Fase 6: pruebas y accesibilidad.
+- [x] Fase 1: base de la aplicación.
+- [x] Fase 2: apuntes.
+- [x] Fase 3: ejercicios existentes.
+- [x] Fase 4: banco de examen.
+- [x] Fase 5: prácticas interactivas.
+- [x] Fase 6: pruebas y accesibilidad.
 - [ ] Fase 7: publicación.
 
 ## Publicación en GitHub
