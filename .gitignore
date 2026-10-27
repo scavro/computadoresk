@@ -42,10 +42,5 @@ Thumbs.db
 .stylelintcache
 tsconfig.tsbuildinfo
 
-# Artefactos de diseño y material docente local
+# Artefactos de diseño local
 .impeccable/
-# Material docente original y contenido íntegro local
-# Se recomienda no versionar PDFs ni la conversión completa en repositorios públicos.
-# Si el repositorio es privado y se desea incluirlos, usa `git add -f`.
-public/fuentes/**/*.pdf
-public/content/

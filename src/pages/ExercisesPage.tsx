@@ -16,7 +16,7 @@ export function ExercisesPage({ solutions }: { solutions: boolean }) {
   const filtered = useMemo(() => exercises?.exercises.filter((exercise) => `${exercise.id} ${exercise.number} ${JSON.stringify(exercise.statement)}`.toLowerCase().includes(query.toLowerCase())) ?? [], [exercises, query]);
 
   if (loading) return <LoadingState />;
-  if (!exercises) return <EmptyState><p>Los ejercicios oficiales están disponibles en la copia local. Ejecuta <code>npm run content:extract</code> para generarlos desde los PDF.</p><Link className="text-link" to="/examen/ejercicios">Abrir el banco de repaso</Link></EmptyState>;
+  if (!exercises) return <EmptyState><p>Los ejercicios oficiales no están disponibles en este momento. Comprueba tu conexión y vuelve a intentarlo.</p><Link className="text-link" to="/examen/ejercicios">Abrir el banco de repaso</Link></EmptyState>;
 
   return (
     <div className="page-shell exercises-page">

@@ -1,4 +1,4 @@
-import { Download, FileText, LockKeyhole } from 'lucide-react';
+import { BookOpen, Download, FileText } from 'lucide-react';
 import { PageHeader } from '../components/PageHeader';
 import { useCourse } from '../context/course';
 
@@ -17,7 +17,7 @@ export function SourcesPage() {
   return (
     <div className="page-shell sources-page">
       <PageHeader title="Fuentes y procedencia" description="Cada colección distingue el material docente del repaso creado para esta web. Los apuntes conservan referencias a las páginas originales." />
-      <div className="privacy-note"><LockKeyhole /><div><strong>Material íntegro solo en local</strong><p>Los documentos y su conversión completa no se suben al repositorio público. El código sí está disponible en GitHub.</p></div></div>
+      <div className="privacy-note"><BookOpen /><div><strong>Material docente disponible</strong><p>Los documentos originales se publican como apoyo al estudio personal de la asignatura. Los apuntes elaborados por el equipo docente de la UNED pertenecen a sus autores.</p></div></div>
       <div className="source-list">{documents.map((document) => <article key={document.id}><FileText /><div><h2>{document.title}</h2><p>{document.description}</p><small>{document.pages ? `${document.pages} páginas · ` : ''}Documento PDF original</small></div>{local ? <a className="icon-button" href={`./fuentes/${document.file}`} target="_blank" rel="noreferrer" aria-label={`Abrir ${document.title}`}><Download /></a> : <span className="source-local-label">Solo local</span>}</article>)}</div>
       <section className="provenance-ledger"><h2>Qué contiene cada colección</h2><dl><div><dt>Apuntes y ejercicios del Tema 1</dt><dd>Material elaborado por el equipo docente de la UNED.</dd></div><div><dt>Banco E01–E15</dt><dd>Ejercicios originales de repaso creados para esta aplicación; no pertenecen a exámenes oficiales.</dd></div><div><dt>Prácticas P01–P08</dt><dd>Laboratorios interactivos de apoyo. No sustituyen a la PEC/PED.</dd></div></dl></section>
     </div>

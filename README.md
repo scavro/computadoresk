@@ -47,7 +47,7 @@ La estructura definitiva se documentará al implementar la Fase 1. El contenido 
 
 ## Material docente
 
-Los apuntes, ejercicios y soluciones originales pertenecen a sus autores y a la UNED. Este repositorio debe mantenerse **privado** salvo que se cuente con autorización para redistribuir ese material. Consulta la sección de GitHub de [PLAN.md](PLAN.md).
+Los apuntes, ejercicios y soluciones originales pertenecen a su equipo docente y a la UNED. Se incluyen en este repositorio y en la web desplegada como apoyo al estudio personal; no son publicaciones oficiales de la asignatura. El contenido extraído puede regenerarse con `npm run content:extract` desde los PDF de `public/fuentes/`.
 
 ## Estado
 
@@ -59,15 +59,10 @@ Los apuntes, ejercicios y soluciones originales pertenecen a sus autores y a la 
 - [x] Fase 4: banco de examen.
 - [x] Fase 5: prácticas interactivas.
 - [x] Fase 6: pruebas y accesibilidad.
-- [ ] Fase 7: publicación.
+- [x] Fase 7: publicación.
 
-## Publicación en GitHub
+## Publicación
 
-El repositorio está preparado localmente en la rama `main`. Para asociarlo a un repositorio remoto:
-
-```bash
-git remote add origin git@github.com:USUARIO/fundamentos-computadores.git
-git push -u origin main
-```
-
-Sustituye `USUARIO` por la cuenta correspondiente. Se recomienda crear primero el repositorio como privado.
+- Repositorio: [scavro/computadoresk](https://github.com/scavro/computadoresk) (rama `main`).
+- Despliegue: Cloudflare Pages conectado al repositorio; cada push a `main` reconstruye y publica la web automáticamente.
+- El despliegue público incluye el material docente completo (apuntes, ejercicios y PDFs originales) para estudiar desde cualquier equipo.

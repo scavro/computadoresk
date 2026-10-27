@@ -26,7 +26,7 @@ export function TopicPage() {
 
   if (!meta) return <EmptyState title="Este tema todavía no está disponible"><p>La UNED publicará nuevos contenidos progresivamente.</p><Link className="text-link" to="/">Volver al álbum</Link></EmptyState>;
   if (loading) return <LoadingState />;
-  if (!topic) return <EmptyState><p>El contenido íntegro se mantiene fuera del repositorio público. En la copia local, ejecuta <code>npm run content:extract</code> desde la carpeta del proyecto.</p><Link className="text-link" to="/fuentes">Ver información sobre las fuentes</Link></EmptyState>;
+  if (!topic) return <EmptyState><p>El contenido del tema no está disponible en este momento. Comprueba tu conexión y vuelve a intentarlo.</p><Link className="text-link" to="/fuentes">Ver información sobre las fuentes</Link></EmptyState>;
 
   const currentIndex = topicMeta.findIndex((item) => item.id === id);
   const next = topicMeta[currentIndex + 1];
