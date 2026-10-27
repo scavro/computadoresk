@@ -30,11 +30,13 @@ describe('representaciones de enteros', () => {
   it('codifica complemento a 2', () => {
     expect(L.twosComplement(-12, 8)).toBe('11110100');
     expect(L.twosComplement(127, 8)).toBe('01111111');
+    expect(L.twosComplement(-1, 33)).toBe('1'.repeat(33));
   });
 
   it('comprueba los límites de complemento a 1', () => {
     expect(L.onesComplement(-12, 8)).toBe('11110011');
     expect(L.onesComplement(-127, 8)).toBe('10000000');
+    expect(L.onesComplement(-1, 33)).toBe('1'.repeat(32) + '0');
     expect(() => L.onesComplement(-128, 8)).toThrow();
   });
 
@@ -81,6 +83,7 @@ describe('rendimiento y memoria', () => {
 
   it('calcula rendimiento de CPU y bus', () => {
     expect(L.cpuTiming(3.2, 200000000, 4).mips).toBeCloseTo(800, 5);
+    expect(L.cpuTiming(3.2, 200000000, 4).TclkNs).toBeCloseTo(0.3125);
     expect(L.busBw(64, 80).bwMBs).toBe(640);
   });
 

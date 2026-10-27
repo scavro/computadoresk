@@ -49,10 +49,22 @@ try {
   await page.evaluate(() => localStorage.setItem('fc-theme', 'light'));
 
   await check('apuntes T1', '/#/temas/1');
+  if (await page.locator('.reading-sheet').count() === 0) errors.push('[content] Tema 1 sin secciones');
   await check('apuntes T2', '/#/temas/2');
+  if (await page.locator('.reading-sheet').count() === 0) errors.push('[content] Tema 2 sin secciones');
   await check('ejercicios', '/#/ejercicios/tema-1');
+  if (await page.locator('.exercise-sheet').count() !== 27) errors.push('[content] no se muestran los 27 ejercicios');
   await check('soluciones', '/#/ejercicios/tema-1/soluciones');
+  if (await page.locator('.exercise-sheet').count() !== 27) errors.push('[content] no se muestran las 27 soluciones');
+  const pdf = await page.request.get(`${BASE}/fuentes/tema-1.pdf`);
+  if (!pdf.ok() || !(await pdf.body()).subarray(0, 5).equals(Buffer.from('%PDF-'))) errors.push('[content] PDF del Tema 1 ausente');
   await check('examen', '/#/examen');
+  await page.getByRole('button', { name: 'Comenzar simulacro' }).click();
+  await page.locator('textarea').first().fill('Mi respuesta');
+  await page.getByRole('button', { name: 'Terminar y revisar' }).click();
+  if (!(await page.locator('textarea').first().evaluate((el) => el.readOnly))) errors.push('[simulacro] respuestas editables tras finalizar');
+  await page.reload({ waitUntil: 'networkidle' });
+  if (!(await page.locator('textarea').first().evaluate((el) => el.readOnly)) || await page.locator('textarea').first().inputValue() !== 'Mi respuesta') errors.push('[simulacro] estado final no persistido');
   await check('ejercicios examen', '/#/examen/ejercicios');
   // Los enunciados de examen llevan fórmulas $...$ en data/exam.ts: KaTeX debe renderizarlas.
   const mathCount = await page.locator('.katex').count();

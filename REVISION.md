@@ -105,7 +105,7 @@ De 12 → 17 tests, cubriendo los fallos anteriores:
 ## Pendiente / decisiones abiertas
 
 1. **Reasos visuales manuales** — la escena 3D (P07) y la impresión de ejercicios/simulacro se han comprobado solo por smoke test (carga sin errores); conviene una pasada visual humana con `npm run preview`.
-2. **Contenido local** — `public/content/*.json` y los PDF de `public/fuentes/` siguen fuera de git (a propósito): sin ellos la web muestra el EmptyState con la instrucción `npm run content:extract`.
+2. **Contenido** — `public/content/*.json` y los PDF de `public/fuentes/` están versionados y se incluyen en la compilación. La comprobación de contenido evita publicar una compilación sin ellos.
 
 Todo lo demás detectado en la revisión (fallos 1–18) está **reparado, verificado y commiteado**.
 

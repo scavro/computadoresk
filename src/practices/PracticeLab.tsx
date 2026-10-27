@@ -90,7 +90,11 @@ export function IntegersLab() {
     <LabShell title="Enteros con signo" description="Observa cómo cambia la misma secuencia de bits según el sistema de representación." result={
       <div>
         <ResultList items={rows.map((row) => {
-          const r = safe(row.calc);
+          const r = safe(() => {
+            if (!Number.isInteger(b) || b < 4 || b > 16) throw new Error('El número de bits debe ser un entero entre 4 y 16.');
+            if (!Number.isInteger(v)) throw new Error('Introduce un número entero.');
+            return row.calc();
+          });
           return { label: row.label, value: 'value' in r ? r.value : (r as { error: string }).error };
         })} />
         <div className="formula-note">Rango de complemento a 2 para {b} bits: {range}.</div>

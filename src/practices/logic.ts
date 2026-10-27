@@ -134,7 +134,7 @@ export function onesComplement(n: number, bits: number): string {
   const maxMag = 2 ** (bits - 1) - 1;
   if (absVal > maxMag) throw new Error(`Fuera de rango [${-maxMag}, ${maxMag}] para ${bits} bits.`);
   if (n >= 0) return unsigned(n, bits);
-  const mag = (2 ** bits - 1) ^ absVal;
+  const mag = 2 ** bits - 1 - absVal;
   return mag.toString(2).padStart(bits, '0');
 }
 
@@ -149,7 +149,7 @@ export function twosComplement(n: number, bits: number): string {
   const max = 2 ** (bits - 1) - 1;
   if (n < min || n > max) throw new Error(`Fuera de rango [-${2**(bits-1)}, ${max}] para ${bits} bits.`);
   if (n >= 0) return unsigned(n, bits);
-  const val = (2 ** bits + n) >>> 0;
+  const val = 2 ** bits + n;
   return val.toString(2).padStart(bits, '0');
 }
 
@@ -206,7 +206,7 @@ export function videoSize(durationS: number, w: number, h: number, bpp: number, 
 export function cpuTiming(freqGHz: number, ni: number, cpi: number) {
   if (freqGHz <= 0 || ni <= 0 || cpi <= 0) throw new Error('Valores inválidos.');
   const fHz = freqGHz * 1e9;
-  const TclkNs = 1000 / freqGHz;
+  const TclkNs = 1 / freqGHz;
   const Nc = ni * cpi;
   const T = Nc / fHz;
   const mips = (ni / T) / 1e6;

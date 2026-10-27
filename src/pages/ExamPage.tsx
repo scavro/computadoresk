@@ -126,7 +126,7 @@ export function SimulacroPage() {
     if (current.finished) return current;
     if (current.running) {
       const remaining = current.endsAt ? Math.max(0, Math.ceil((current.endsAt - Date.now()) / 1000)) : current.remaining;
-      return { ...current, remaining, running: false, endsAt: null };
+      return { ...current, remaining, running: false, finished: remaining === 0, endsAt: null };
     }
     return { ...current, running: true, endsAt: Date.now() + current.remaining * 1000 };
   });
@@ -141,12 +141,12 @@ export function SimulacroPage() {
       <div className="simulacro-toolbar">
         <div><Link className="back-link" to="/examen"><ArrowLeft size={16} /> Salir del simulacro</Link><h1>Simulacro en curso</h1></div>
         <div className={simulacro.remaining < 600 ? 'timer is-low' : 'timer'}><Clock3 size={20} />{timerVisible && <span>{minutes}:{seconds}</span>}<button onClick={() => setTimerVisible(!timerVisible)} aria-label={timerVisible ? 'Ocultar temporizador' : 'Mostrar temporizador'}>{timerVisible ? <EyeOff size={17} /> : <Eye size={17} />}</button></div>
-        <div className="timer-actions"><button className="button button-secondary" onClick={toggleTimer}>{simulacro.running ? <Pause size={17} /> : <Play size={17} />}{simulacro.running ? 'Pausar' : 'Continuar'}</button><button className="icon-button" onClick={restart} title="Nuevo simulacro" aria-label="Nuevo simulacro"><RotateCcw size={18} /></button></div>
+        <div className="timer-actions"><button className="button button-secondary" onClick={toggleTimer} disabled={simulacro.finished}>{simulacro.running ? <Pause size={17} /> : <Play size={17} />}{simulacro.running ? 'Pausar' : 'Continuar'}</button><button className="icon-button" onClick={restart} title="Nuevo simulacro" aria-label="Nuevo simulacro"><RotateCcw size={18} /></button></div>
       </div>
       {simulacro.finished && <div className="time-finished"><AlarmClock /><div><strong>{simulacro.remaining === 0 ? 'El tiempo ha terminado' : 'Simulacro finalizado'}</strong><p>Contrasta ahora tus respuestas con el desarrollo completo.</p></div><Link className="button button-primary" to="/examen/soluciones">Abrir soluciones</Link></div>}
       <div className="simulacro-progress"><span style={{ width: `${(simulacro.remaining / 7200) * 100}%` }} /></div>
-      {selected.map((exercise, index) => <article className="exercise-sheet" key={exercise.id}><header><span className="exercise-number">{index + 1} / 5</span><span className="exercise-topic">{exercise.id} · Tema {exercise.topic}</span></header><h2>{exercise.title}</h2><MathParagraphs paragraphs={exercise.statement} /><label className="answer-area"><span>Desarrollo</span><textarea rows={8} value={answers[exercise.id] ?? ''} onChange={(event) => setAnswers((current) => ({ ...current, [exercise.id]: event.target.value }))} placeholder="Desarrolla tu solución…" /></label></article>)}
-      <button className="button button-primary finish-exam" onClick={() => setSimulacro((current) => ({ ...current, running: false, finished: true, endsAt: null }))}>Terminar y revisar <ArrowRight size={18} /></button>
+      {selected.map((exercise, index) => <article className="exercise-sheet" key={exercise.id}><header><span className="exercise-number">{index + 1} / 5</span><span className="exercise-topic">{exercise.id} · Tema {exercise.topic}</span></header><h2>{exercise.title}</h2><MathParagraphs paragraphs={exercise.statement} /><label className="answer-area"><span>Desarrollo</span><textarea rows={8} readOnly={simulacro.finished} value={answers[exercise.id] ?? ''} onChange={(event) => setAnswers((current) => ({ ...current, [exercise.id]: event.target.value }))} placeholder="Desarrolla tu solución…" /></label></article>)}
+      {!simulacro.finished && <button className="button button-primary finish-exam" onClick={() => setSimulacro((current) => ({ ...current, running: false, finished: true, endsAt: null }))}>Terminar y revisar <ArrowRight size={18} /></button>}
     </div>
   );
 }

@@ -18,7 +18,7 @@ Consulta el plan completo en [PLAN.md](PLAN.md).
 
 ## Requisitos
 
-- Node.js 20 o superior.
+- Node.js 24 (versión utilizada en integración continua).
 - npm.
 
 ## Puesta en marcha
@@ -39,11 +39,12 @@ npm run preview        # Vista previa de la compilación
 npm run test           # Pruebas
 npm run lint           # Comprobaciones de código
 npm run content:extract # Regenera el contenido local desde los PDF originales
+npm run content:check   # Comprueba apuntes, ejercicios y PDF antes de publicar
 ```
 
 ## Estructura
 
-La estructura definitiva se documentará al implementar la Fase 1. El contenido de los apuntes estará separado de los componentes de interfaz para facilitar la incorporación de futuros temas.
+El contenido de los apuntes y ejercicios se encuentra en `public/content/`, separado de la interfaz en `src/`. Los PDF originales están en `public/fuentes/`. Ambos directorios están versionados y se incluyen en la compilación de producción.
 
 ## Material docente
 
