@@ -1,7 +1,8 @@
-import { lazy, Suspense, useMemo, useState } from 'react';
+import { lazy, Suspense, useMemo } from 'react';
 import type { ReactNode } from 'react';
 
 import * as L from './logic';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 const MemoryScene = lazy(() => import('./MemoryScene'));
 
@@ -35,14 +36,14 @@ function ResultList({ items }: { items: Array<{ label: string; value: string }> 
 }
 
 export function BasesLab() {
-  const [decimal, setDecimal] = useState('37.625');
-  const [maxFrac, setMaxFrac] = useState('12');
-  const [binary, setBinary] = useState('100101.101');
-  const [hex, setHex] = useState('25');
-  const [elements, setElements] = useState('750');
+  const [decimal, setDecimal] = useLocalStorage('fc-lab-1-1', '37.625');
+  const [maxFrac, setMaxFrac] = useLocalStorage('fc-lab-1-2', '12');
+  const [binary, setBinary] = useLocalStorage('fc-lab-1-3', '100101.101');
+  const [hex, setHex] = useLocalStorage('fc-lab-1-4', '25');
+  const [elements, setElements] = useLocalStorage('fc-lab-1-5', '750');
   const conv = useMemo(() => safe(() => L.decToBinFrac(Number(decimal), Number(maxFrac))), [decimal, maxFrac]);
   const hexConv = useMemo(() => safe(() => L.decToHex(Math.floor(Number(decimal)))), [decimal]);
-  const binDec = useMemo(() => safe(() => L.binIntToDec(binary.split('.')[0] || '0')), [binary]);
+  const binDec = useMemo(() => safe(() => L.binToDec(binary)), [binary]);
   const hexDec = useMemo(() => safe(() => L.hexToDec(hex)), [hex]);
   const bits = useMemo(() => safe(() => L.minBitsForElements(Number(elements))), [elements]);
 
@@ -72,8 +73,8 @@ export function BasesLab() {
 }
 
 export function IntegersLab() {
-  const [bits, setBits] = useState('8');
-  const [value, setValue] = useState('-12.375');
+  const [bits, setBits] = useLocalStorage('fc-lab-2-1', '8');
+  const [value, setValue] = useLocalStorage('fc-lab-2-2', '-12');
   const b = Number(bits);
   const v = Number(value);
   const rows = useMemo(() => [
@@ -81,7 +82,7 @@ export function IntegersLab() {
     { label: 'Signo y magnitud', calc: () => L.signMagnitude(v, b) },
     { label: 'Complemento a 1', calc: () => L.onesComplement(v, b) },
     { label: 'Complemento a 2', calc: () => L.twosComplement(v, b) },
-    { label: 'Exceso a 2^(n-1)', calc: () => L.twosComplement(v + 2 ** (b - 1), b) },
+    { label: 'Exceso a 2^(n-1)', calc: () => L.excessM(v, b) },
   ], [b, v]);
   const range = `[-${2 ** (b - 1)}, ${2 ** (b - 1) - 1}]`;
 
@@ -96,17 +97,17 @@ export function IntegersLab() {
       </div>
     }>
       <Field label="Número de bits" hint="4 a 16"><input value={bits} onChange={(event) => setBits(event.target.value)} inputMode="numeric" /></Field>
-      <Field label="Número decimal" hint="Ejemplo: -12.375"><input value={value} onChange={(event) => setValue(event.target.value)} inputMode="decimal" /></Field>
+      <Field label="Número decimal" hint="Ejemplo: -12"><input value={value} onChange={(event) => setValue(event.target.value)} inputMode="decimal" /></Field>
       <div className="lab-field full"><span>Representación</span><div className="bit-display">{'10101010'.split('').map((bit, index) => <span key={index}>{bit}</span>)}</div><small>La banda superior muestra el patrón conceptual; el resultado superior es el cálculo exacto.</small></div>
     </LabShell>
   );
 }
 
 export function RealsLab() {
-  const [bits, setBits] = useState('10');
-  const [frac, setFrac] = useState('4');
-  const [value, setValue] = useState('-12.375');
-  const [ieeeValue, setIeeeValue] = useState('18.75');
+  const [bits, setBits] = useLocalStorage('fc-lab-3-1', '10');
+  const [frac, setFrac] = useLocalStorage('fc-lab-3-2', '4');
+  const [value, setValue] = useLocalStorage('fc-lab-3-3', '-12.375');
+  const [ieeeValue, setIeeeValue] = useLocalStorage('fc-lab-3-4', '18.75');
   const fixed = useMemo(() => safe(() => L.fixedTwos(Number(bits), Number(frac), Number(value))), [bits, frac, value]);
   const unsigned = useMemo(() => safe(() => L.fixedUnsigned(Number(bits), Number(frac))), [bits, frac]);
   const ieee = useMemo(() => safe(() => L.iee754Single(Number(ieeeValue))), [ieeeValue]);
@@ -137,15 +138,15 @@ export function RealsLab() {
 }
 
 export function MultimediaLab() {
-  const [w, setW] = useState('2560');
-  const [h, setH] = useState('1440');
-  const [bpp, setBpp] = useState('24');
-  const [audioDuration, setAudioDuration] = useState('20');
-  const [sr, setSr] = useState('48000');
-  const [audioBps, setAudioBps] = useState('16');
-  const [channels, setChannels] = useState('2');
-  const [videoDuration, setVideoDuration] = useState('20');
-  const [fps, setFps] = useState('25');
+  const [w, setW] = useLocalStorage('fc-lab-4-1', '2560');
+  const [h, setH] = useLocalStorage('fc-lab-4-2', '1440');
+  const [bpp, setBpp] = useLocalStorage('fc-lab-4-3', '24');
+  const [audioDuration, setAudioDuration] = useLocalStorage('fc-lab-4-4', '20');
+  const [sr, setSr] = useLocalStorage('fc-lab-4-5', '48000');
+  const [audioBps, setAudioBps] = useLocalStorage('fc-lab-4-6', '16');
+  const [channels, setChannels] = useLocalStorage('fc-lab-4-7', '2');
+  const [videoDuration, setVideoDuration] = useLocalStorage('fc-lab-4-8', '20');
+  const [fps, setFps] = useLocalStorage('fc-lab-4-9', '25');
   const image = useMemo(() => safe(() => L.imageSize(Number(w), Number(h), Number(bpp))), [w, h, bpp]);
   const audio = useMemo(() => safe(() => L.audioSize(Number(audioDuration), Number(sr), Number(audioBps), Number(channels))), [audioDuration, sr, audioBps, channels]);
   const video = useMemo(() => safe(() => L.videoSize(Number(videoDuration), Number(w), Number(h), Number(bpp), Number(fps))), [videoDuration, w, h, bpp, fps]);
@@ -173,13 +174,13 @@ export function MultimediaLab() {
 }
 
 export function PerformanceLab() {
-  const [freq, setFreq] = useState('3.2');
-  const [ni, setNi] = useState('200000000');
-  const [cpi, setCpi] = useState('4');
-  const [bits, setBits] = useState('64');
-  const [mtps, setMtps] = useState('80');
-  const [to, setTo] = useState('1.5');
-  const [t, setT] = useState('2');
+  const [freq, setFreq] = useLocalStorage('fc-lab-5-1', '3.2');
+  const [ni, setNi] = useLocalStorage('fc-lab-5-2', '200000000');
+  const [cpi, setCpi] = useLocalStorage('fc-lab-5-3', '4');
+  const [bits, setBits] = useLocalStorage('fc-lab-5-4', '64');
+  const [mtps, setMtps] = useLocalStorage('fc-lab-5-5', '80');
+  const [to, setTo] = useLocalStorage('fc-lab-5-6', '1.5');
+  const [t, setT] = useLocalStorage('fc-lab-5-7', '2');
   const cpu = useMemo(() => safe(() => L.cpuTiming(Number(freq), Number(ni), Number(cpi))), [freq, ni, cpi]);
   const bw = useMemo(() => safe(() => L.busBw(Number(bits), Number(mtps))), [bits, mtps]);
   const occ = useMemo(() => safe(() => L.busOcc('value' in bw ? bw.value.bwMBs : 0, Number(to), Number(t))), [bw, to, t]);
@@ -214,9 +215,9 @@ export function PerformanceLab() {
 }
 
 export function MemoryLab() {
-  const [units, setUnits] = useState('8388608');
-  const [bytesPerUnit, setBytesPerUnit] = useState('1');
-  const [wordBits, setWordBits] = useState('32');
+  const [units, setUnits] = useLocalStorage('fc-lab-6-1', '8388608');
+  const [bytesPerUnit, setBytesPerUnit] = useLocalStorage('fc-lab-6-2', '1');
+  const [wordBits, setWordBits] = useLocalStorage('fc-lab-6-3', '32');
   const info = useMemo(() => safe(() => L.memoryInfo(Number(units), Number(bytesPerUnit), Number(wordBits))), [units, bytesPerUnit, wordBits]);
   return (
     <LabShell title="Memoria y direcciones" description="Calcula capacidad, bits de dirección y palabras completas." result={
@@ -234,11 +235,11 @@ export function MemoryLab() {
 }
 
 export function ExpansionLab() {
-  const [baseN, setBaseN] = useState('256');
-  const [baseL, setBaseL] = useState('8');
-  const [targetN, setTargetN] = useState('1024');
-  const [targetL, setTargetL] = useState('8');
-  const [selectedGroup, setSelectedGroup] = useState(0);
+  const [baseN, setBaseN] = useLocalStorage('fc-lab-7-1', '256');
+  const [baseL, setBaseL] = useLocalStorage('fc-lab-7-2', '8');
+  const [targetN, setTargetN] = useLocalStorage('fc-lab-7-3', '1024');
+  const [targetL, setTargetL] = useLocalStorage('fc-lab-7-4', '8');
+  const [selectedGroup, setSelectedGroup] = useLocalStorage('fc-lab-7-5', 0);
   const exp = useMemo(() => safe(() => L.memoryExpand(Number(baseN), Number(baseL), Number(targetN), Number(targetL))), [baseN, baseL, targetN, targetL]);
   const data = 'value' in exp ? exp.value : null;
   const groups = data?.q ?? 1;
@@ -283,8 +284,8 @@ export function ExpansionLab() {
 }
 
 export function DDRLab() {
-  const [freq, setFreq] = useState('1600');
-  const [width, setWidth] = useState('64');
+  const [freq, setFreq] = useLocalStorage('fc-lab-8-1', '1600');
+  const [width, setWidth] = useLocalStorage('fc-lab-8-2', '64');
   const ddr = useMemo(() => safe(() => L.ddrBw(Number(freq), Number(width))), [freq, width]);
   return (
     <LabShell title="DDR SDRAM" description="Convierte la frecuencia de reloj en tasa de transferencia y ancho de banda." result={

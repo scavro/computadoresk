@@ -16,6 +16,10 @@ export function Header() {
 
   return (
     <header className="site-header">
+      <a className="skip-link" href="#contenido" onClick={(event) => {
+        event.preventDefault();
+        document.getElementById('contenido')?.focus();
+      }}>Saltar al contenido</a>
       <Link className="brand" to="/" aria-label="Fundamentos de Computadores, inicio" onClick={() => setOpen(false)}>
         <span className="brand-mark"><BookOpen size={23} strokeWidth={1.8} /></span>
         <span><strong>Fundamentos</strong><small>de Computadores</small></span>

@@ -18,11 +18,30 @@ import { SearchPage } from './pages/SearchPage';
 function ScrollManager() {
   const location = useLocation();
   useEffect(() => {
+    let cancelled = false;
+    let timer = 0;
     if (location.hash) {
-      window.setTimeout(() => document.getElementById(location.hash.slice(1))?.scrollIntoView(), 50);
+      const id = decodeURIComponent(location.hash.slice(1));
+      let attempts = 0;
+      const scrollToTarget = () => {
+        if (cancelled) return;
+        const target = document.getElementById(id);
+        if (target) {
+          target.scrollIntoView();
+          return;
+        }
+        attempts += 1;
+        if (attempts < 40) timer = window.setTimeout(scrollToTarget, 50);
+      };
+      scrollToTarget();
     } else {
       window.scrollTo({ top: 0, behavior: 'instant' });
+      document.getElementById('contenido')?.focus({ preventScroll: true });
     }
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [location.pathname, location.hash]);
   return null;
 }
@@ -32,7 +51,7 @@ function AppRoutes() {
     <>
       <ScrollManager />
       <Header />
-      <main id="contenido">
+      <main id="contenido" tabIndex={-1}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/temas/:topicId" element={<TopicPage />} />

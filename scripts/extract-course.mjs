@@ -121,7 +121,7 @@ function parseTopic(fileName, topicNumber, skipPages = 2) {
     title: topicNumber === 1 ? 'Representación de la información y estructura básica de un computador' : 'Unidad de memoria',
     subtitle: topicNumber === 2 ? 'Parte 1 disponible' : undefined,
     source: files[`topic${topicNumber}`],
-    totalPages: pageList.length,
+    totalPages: pageList.filter(Boolean).length,
     sections: merged,
   };
 }
@@ -147,8 +147,8 @@ function parseExercises() {
   return chunks.map((chunk) => ({
     id: chunk.key,
     number: chunk.key,
-    statement: [{ type: 'paragraph', text: chunk.text.replace(/^.*?\n/, '').trim() || chunk.text }],
-    solution: [{ type: 'paragraph', text: (solutionMap.get(chunk.key) || '').replace(/^.*?\n/, '').trim() || solutionMap.get(chunk.key) || '' }],
+    statement: [{ type: 'paragraph', text: chunk.text.trim() }],
+    solution: [{ type: 'paragraph', text: (solutionMap.get(chunk.key) || '').trim() }],
   }));
 }
 

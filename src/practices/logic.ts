@@ -6,6 +6,22 @@ export type BinFraccResult = {
   steps: string[];
 };
 
+export function binToDec(s: string): { dec: number; steps: string[] } {
+  const clean = s.replace(/\s+/g, '');
+  if (!/^[01]+(?:\.[01]+)?$/.test(clean)) throw new Error('Usa dígitos binarios y, opcionalmente, una parte fraccionaria.');
+  const [integer, fraction = ''] = clean.split('.');
+  const result = binIntToDec(integer);
+  let dec = result.dec;
+  const steps = [...result.steps];
+  for (let i = 0; i < fraction.length; i++) {
+    const bit = Number(fraction[i]);
+    const value = bit * 2 ** -(i + 1);
+    if (bit === 1) steps.push(`2^-${i + 1} · 1 = ${value}`);
+    dec += value;
+  }
+  return { dec, steps };
+}
+
 export function decToBinInt(n: number): { bin: string; steps: string[] } {
   if (!Number.isFinite(n) || !Number.isInteger(n)) throw new Error('Introduce un entero no negativo.');
   if (n < 0) throw new Error('Usa solo valores no negativos.');
@@ -113,15 +129,22 @@ export function signMagnitude(n: number, bits: number): string {
 }
 
 export function onesComplement(n: number, bits: number): string {
-  const absVal = Math.abs(Math.trunc(n));
-  const max = 2 ** bits - 1;
-  if (absVal > max) throw new Error('Valor fuera de rango.');
+  if (!Number.isInteger(n) || !Number.isInteger(bits) || bits < 2) throw new Error('Introduce un entero y un formato de al menos 2 bits.');
+  const absVal = Math.abs(n);
+  const maxMag = 2 ** (bits - 1) - 1;
+  if (absVal > maxMag) throw new Error(`Fuera de rango [${-maxMag}, ${maxMag}] para ${bits} bits.`);
   if (n >= 0) return unsigned(n, bits);
   const mag = (2 ** bits - 1) ^ absVal;
   return mag.toString(2).padStart(bits, '0');
 }
 
+export function excessM(n: number, bits: number, m = 2 ** (bits - 1)): string {
+  if (!Number.isInteger(n) || !Number.isInteger(bits) || bits < 1 || !Number.isInteger(m) || m < 0) throw new Error('Formato o valor inválido.');
+  return unsigned(n + m, bits);
+}
+
 export function twosComplement(n: number, bits: number): string {
+  if (!Number.isInteger(n) || !Number.isInteger(bits) || bits < 2) throw new Error('Introduce un entero y un formato de al menos 2 bits.');
   const min = -(2 ** (bits - 1));
   const max = 2 ** (bits - 1) - 1;
   if (n < min || n > max) throw new Error(`Fuera de rango [-${2**(bits-1)}, ${max}] para ${bits} bits.`);
@@ -131,24 +154,24 @@ export function twosComplement(n: number, bits: number): string {
 }
 
 export function fixedUnsigned(n: number, frac: number): { bin: string; rangeMax: number; res: number; value: number } {
-  if (n <= 0 || frac < 0 || !Number.isInteger(n) || !Number.isInteger(frac)) throw new Error('Formato inválido.');
+  if (n <= 0 || frac < 0 || frac >= n || !Number.isInteger(n) || !Number.isInteger(frac)) throw new Error('Formato inválido.');
   const res = 2 ** -frac;
-  const rangeMax = 2 ** n - res;
-  return { bin: (Math.round(n * 2 ** frac) / 2 ** frac).toString(2), rangeMax, res, value: rangeMax };
+  const rangeMax = 2 ** (n - frac) - res;
+  return { bin: (2 ** n - 1).toString(2).padStart(n, '0'), rangeMax, res, value: rangeMax };
 }
 
 export function fixedTwos(n: number, frac: number, val: number): { rep: string; rangeMin: number; rangeMax: number; res: number } {
-  if (n <= 0 || frac < 0 || !Number.isInteger(n) || !Number.isInteger(frac)) throw new Error('Formato inválido.');
+  if (n <= 0 || frac < 0 || frac >= n || !Number.isInteger(n) || !Number.isInteger(frac) || !Number.isFinite(val)) throw new Error('Formato o valor inválido.');
   const res = 2 ** -frac;
-  const rangeMin = -(2 ** (n - 1));
-  const rangeMax = 2 ** (n - 1) - res;
+  const rangeMin = -(2 ** (n - frac - 1));
+  const rangeMax = 2 ** (n - frac - 1) - res;
   const scaled = Math.round(val * 2 ** frac);
-  const minScaled = Math.round(rangeMin * 2 ** frac);
-  const maxScaled = Math.round(rangeMax * 2 ** frac);
+  const minScaled = -(2 ** (n - 1));
+  const maxScaled = 2 ** (n - 1) - 1;
   if (scaled < minScaled || scaled > maxScaled) throw new Error('Valor fuera del rango del formato.');
-  let rep = (scaled % (2 ** n)).toString(2).padStart(n, '0');
-  if (rep.length > n) rep = rep.slice(-n);
-  return { rep, rangeMin, rangeMax, res };
+  const modulus = 2 ** n;
+  const encoded = ((scaled % modulus) + modulus) % modulus;
+  return { rep: encoded.toString(2).padStart(n, '0'), rangeMin, rangeMax, res };
 }
 
 export function iee754Single(val: number): { bits: string; s: string; e: string; f: string; hex: string } {

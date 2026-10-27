@@ -24,7 +24,7 @@ export function ExercisesPage({ solutions }: { solutions: boolean }) {
       <PageHeader
         title={solutions ? 'Soluciones del Tema 1' : 'Ejercicios del Tema 1'}
         description={solutions ? 'Desarrollo completo de los 27 ejercicios. Contrasta el procedimiento después de intentar cada problema.' : '27 ejercicios del material docente. Las soluciones están en una colección separada para que puedas resolver sin pistas.'}
-        aside={<span className="collection-stamp">{completedExercises.length} / 27<br /><small>completados</small></span>}
+        aside={<span className="collection-stamp">{completedExercises.filter((id) => id.startsWith('oficial:')).length} / 27<br /><small>completados</small></span>}
       />
       <div className="exercise-toolbar">
         <div className="segmented-control">
