@@ -1,20 +1,8 @@
-import { createContext, useCallback, useContext, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-
-interface ProgressState {
-  readSections: string[];
-  completedExercises: string[];
-  completedPractices: string[];
-}
-
-interface ProgressContextValue extends ProgressState {
-  toggle: (key: keyof ProgressState, id: string) => void;
-  reset: () => void;
-}
-
-const emptyProgress: ProgressState = { readSections: [], completedExercises: [], completedPractices: [] };
-const ProgressContext = createContext<ProgressContextValue | null>(null);
+import { ProgressContext, emptyProgress } from './progress';
+import type { ProgressState } from './progress';
 
 export function ProgressProvider({ children }: { children: ReactNode }) {
   const [progress, setProgress] = useLocalStorage<ProgressState>('fc-progress-v1', emptyProgress);
@@ -39,10 +27,4 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   }), [progress, setProgress, toggle]);
 
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;
-}
-
-export function useProgress() {
-  const context = useContext(ProgressContext);
-  if (!context) throw new Error('useProgress debe utilizarse dentro de ProgressProvider');
-  return context;
 }

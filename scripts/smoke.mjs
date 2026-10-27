@@ -54,6 +54,10 @@ try {
   await check('soluciones', '/#/ejercicios/tema-1/soluciones');
   await check('examen', '/#/examen');
   await check('ejercicios examen', '/#/examen/ejercicios');
+  // Los enunciados de examen llevan fórmulas $...$ en data/exam.ts: KaTeX debe renderizarlas.
+  const mathCount = await page.locator('.katex').count();
+  console.log(`fórmulas KaTeX en ejercicios de examen: ${mathCount}`);
+  if (mathCount === 0) errors.push('[katex] no se renderizó ninguna fórmula en los ejercicios de examen');
   await check('practicas', '/#/practicas');
   await check('practica bases', '/#/practicas/bases');
   await check('practica memoria 3D', '/#/practicas/memoria');

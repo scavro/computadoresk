@@ -1,24 +1,7 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import type { ExerciseDocument, SourcesFile, Topic } from '../types';
-
-interface CourseContextValue {
-  topics: Record<number, Topic | null>;
-  exercises: ExerciseDocument | null;
-  sources: SourceDocument[];
-  loading: boolean;
-  available: boolean;
-}
-
-interface SourceDocument {
-  id: string;
-  title: string;
-  file: string;
-  pages?: number;
-  description: string;
-}
-
-const CourseContext = createContext<CourseContextValue | null>(null);
+import type { ExerciseDocument, SourceDocument, SourcesFile, Topic } from '../types';
+import { CourseContext } from './course';
 
 async function loadJson<T>(path: string): Promise<T | null> {
   try {
@@ -58,10 +41,4 @@ export function CourseProvider({ children }: { children: ReactNode }) {
       {children}
     </CourseContext.Provider>
   );
-}
-
-export function useCourse() {
-  const context = useContext(CourseContext);
-  if (!context) throw new Error('useCourse debe utilizarse dentro de CourseProvider');
-  return context;
 }

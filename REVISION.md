@@ -1,17 +1,18 @@
 # Revisión del proyecto — estado
 
-Fecha: 26/10/2026
+Fecha: 26/10/2026 (2.ª pasada: reparación de lo hallado + commit)
 Alcance: revisión completa del proyecto en busca de fallos (lógica, estilos, extracción de contenido, accesibilidad, persistencia) + verificación automática.
 
 ## Verificación automática (última ejecpción)
 
 | Comando | Resultado |
 | --- | --- |
-| `npm run lint` | ✅ 0 errores, 3 avisos conocidos (ver "Pendientes") |
-| `npm run test` | ✅ 17/17 tests en `src/practices/logic.test.ts` |
+| `npm run lint` | ✅ **0 errores, 0 avisos** |
+| `npm run test` | ✅ 17/17 tests en `src/practices/logic.test.ts` (vitest 5) |
 | `npm run build` | ✅ `tsc -b && vite build` sin errores |
+| `npm audit` | ✅ **0 vulnerabilidades** (antes: 4 — 2 críticas) |
 | `npm run content:extract` | ✅ 24 secciones (T1), 21 (T2), 27 ejercicios, 48+11 ejemplos, 87+72 bloques |
-| `npm run smoke` | ✅ 13 rutas + tema claro/oscuro + búsqueda + móvil 390px; sin errores de consola ni overflow |
+| `npm run smoke` | ✅ 13 rutas + tema claro/oscuro + búsqueda + KaTeX (90 fórmulas) + móvil 390px; sin errores de consola ni overflow |
 
 ## Fallos encontrados y corregidos
 
@@ -78,6 +79,20 @@ Alcance: revisión completa del proyecto en busca de fallos (lógica, estilos, e
     `#/buscar?q=complemento` cargaba vacío (la query vivía solo en `useState`), y los enunciados/soluciones oficiales no estaban en el índice.
     **Corregido:** query sincronizada con `useSearchParams` (deep-links compartibles), índice ampliado con los 27 ejercicios y sus soluciones, y enlace con el ancla real `#ejercicio-<id>` (antes apuntaba a un id inexistente). Verificado: `q=complemento` → 10 resultados.
 
+### Herramientas / calidad
+
+16. **3 avisos de ESLint** (`react-refresh/only-export-components`) en los contextos.
+    El patrón "provider + hook en el mismo fichero" impide el fast-refresh de Vite.
+    **Corregido:** cada contexto se ha partido en dos — módulo de contexto/hooks sin JSX (`src/context/{theme,course,progress}.ts`) y provider JSX (`ThemeContext.tsx`, `CourseContext.tsx`, `ProgressContext.tsx`), actualizando los 11 imports. `npm run lint` ahora sale **limpio, sin avisos**.
+
+17. **`npm audit`: 4 vulnerabilidades (2 críticas, 1 moderada, 1 baja)**.
+    - 3 en `tinypool` (vía `vitest@3`, solo desarrollo). **Corregido:** `vitest@5.0.5`; los 17 tests siguen en verde.
+    - 1 en `katex 0.11–0.18.1` (GHSA-238p-pmpm-9mq7, prototype pollution). **Corregido:** `katex@0.19.1` (API usada: solo `renderToString` + CSS, compatible). Verificado en smoke: 90 fórmulas renderizadas.
+    - Resultado: **`npm audit` → 0 vulnerabilidades**.
+
+18. **Aviso de deprecación de ESLint** en ejecuciones anteriores.
+    **Corregido / ya no aparece:** tras actualizar dependencias y con el lint actual, la salida no muestra ningún aviso de deprecación.
+
 ## Pruebas añadidas (`src/practices/logic.test.ts`)
 
 De 12 → 17 tests, cubriendo los fallos anteriores:
@@ -89,12 +104,10 @@ De 12 → 17 tests, cubriendo los fallos anteriores:
 
 ## Pendiente / decisiones abiertas
 
-1. **3 avisos de ESLint** (`react-refresh/only-export-components`) en `src/context/{Course,Progress,Theme}Context.tsx`.
-   Son el patrón habitual de "provider + hook en el mismo archivo"; arreglarlos requiere separar cada hook en su propio fichero. Es cosmético (no afecta a producción).
-2. **`npm audit`: 4 vulnerabilidades (2 críticas)** — todas en `tinypool`, dependencia de `vitest` (solo entorno de desarrollo; no entra en `dist/`).
-   El fix requiere `npm audit fix --force` → `vitest@5` (cambio mayor). Recomiendo dejarlo así o probar la actualización en una rama.
-3. **Aviso de deprecación en ESLint** durante el lint (aviso del propio ESLint, sin impacto).
-4. ~~**Smoke test visual en navegador**~~ — **hecho**: se añadió `npm run smoke` (`scripts/smoke.mjs`, Playwright + Chrome del sistema) que sirve `dist/` y comprueba 13 rutas, tema claro/oscuro, búsqueda y overflow en 1280/390px. Repasos visuales puntuales (P07 3D, impresión) siguen siendo manuales.
+1. **Reasos visuales manuales** — la escena 3D (P07) y la impresión de ejercicios/simulacro se han comprobado solo por smoke test (carga sin errores); conviene una pasada visual humana con `npm run preview`.
+2. **Contenido local** — `public/content/*.json` y los PDF de `public/fuentes/` siguen fuera de git (a propósito): sin ellos la web muestra el EmptyState con la instrucción `npm run content:extract`.
+
+Todo lo demás detectado en la revisión (fallos 1–18) está **reparado, verificado y commiteado**.
 
 ## Cómo verificar desde cero
 

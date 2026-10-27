@@ -1,6 +1,6 @@
 import { Download, FileText, LockKeyhole } from 'lucide-react';
 import { PageHeader } from '../components/PageHeader';
-import { useCourse } from '../context/CourseContext';
+import { useCourse } from '../context/course';
 
 const documents = [
   { id: 'tema-1', title: 'Apuntes del Tema 1', file: 'tema-1.pdf', pages: 92, description: 'Representación de la información y estructura básica de un computador.' },

@@ -4,7 +4,7 @@ import { ArrowRight, Search } from 'lucide-react';
 import { PageHeader } from '../components/PageHeader';
 import { examExercises } from '../data/exam';
 import { practiceMeta, topicMeta } from '../data/course';
-import { useCourse } from '../context/CourseContext';
+import { useCourse } from '../context/course';
 import type { ContentBlock } from '../types';
 
 interface Result { title: string; type: string; description: string; to: string; searchText?: string }

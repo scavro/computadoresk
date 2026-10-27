@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, Check, ChevronRight, FlaskConical, PencilLine } from 'lucide-react';
 import gsap from 'gsap';
 import { futureTopics, topicMeta } from '../data/course';
-import { useProgress } from '../context/ProgressContext';
+import { useProgress } from '../context/progress';
 
 function TopicArt({ topic }: { topic: number }) {
   if (topic === 1) {

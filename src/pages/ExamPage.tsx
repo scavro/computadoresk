@@ -6,7 +6,7 @@ import { MathParagraphs } from '../components/RichText';
 import { PageHeader } from '../components/PageHeader';
 import { EmptyState } from '../components/EmptyState';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { useProgress } from '../context/ProgressContext';
+import { useProgress } from '../context/progress';
 
 interface SimulacroState {
   ids: string[];

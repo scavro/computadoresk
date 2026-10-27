@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, CheckCircle2, Circle } from 'lucide-react';
 import { practiceMeta } from '../data/course';
-import { useProgress } from '../context/ProgressContext';
+import { useProgress } from '../context/progress';
 import { EmptyState } from '../components/EmptyState';
 import { PracticeLab } from '../practices/PracticeLab';
 

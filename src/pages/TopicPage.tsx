@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, Circle, ExternalLink, Printer, Search } from 'lucide-react';
-import { useCourse } from '../context/CourseContext';
-import { useProgress } from '../context/ProgressContext';
+import { useCourse } from '../context/course';
+import { useProgress } from '../context/progress';
 import { topicMeta } from '../data/course';
 import { CourseBlocks } from '../components/CourseBlocks';
 import { EmptyState, LoadingState } from '../components/EmptyState';

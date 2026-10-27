@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Binary, Boxes, Check, Cpu, Gauge, Image, MemoryStick, Sigma, ToggleLeft, Waves } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { practiceMeta } from '../data/course';
-import { useProgress } from '../context/ProgressContext';
+import { useProgress } from '../context/progress';
 import { PageHeader } from '../components/PageHeader';
 
 const icons: Record<string, LucideIcon> = { binary: Binary, toggle: ToggleLeft, sigma: Sigma, image: Image, gauge: Gauge, memory: MemoryStick, boxes: Boxes, waves: Waves };

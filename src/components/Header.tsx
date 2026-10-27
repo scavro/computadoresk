@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { BookOpen, Github, Menu, Moon, Search, Sun, X } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../context/theme';
 
 const links = [
   { to: '/temas/1', label: 'Apuntes' },
