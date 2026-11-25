@@ -80,8 +80,13 @@ try {
 
   await check('practicas', '/#/practicas');
   await check('practica bases', '/#/practicas/bases');
+  await check('practica ampliacion 3D', '/#/practicas/ampliacion');
+  const ampBox = await page.locator('.memory-scene canvas').boundingBox();
+  if (!ampBox || ampBox.height < 350) errors.push(`[3D] canvas de ampliacion con altura inválida: ${ampBox?.height ?? 0}`);
   await check('practica cache', '/#/practicas/cache');
   await check('practica hdd 3D', '/#/practicas/hdd');
+  const hddBox = await page.locator('.memory-scene canvas').boundingBox();
+  if (!hddBox || hddBox.height < 350) errors.push(`[3D] canvas de hdd con altura inválida: ${hddBox?.height ?? 0}`);
   await check('practica es-dma', '/#/practicas/es-dma');
   await check('practica cpu-pipeline', '/#/practicas/cpu-pipeline');
   await check('guia', '/#/guia');

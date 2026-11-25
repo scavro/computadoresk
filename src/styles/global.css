@@ -377,7 +377,8 @@ code { font-family: var(--mono); font-size: .9em; background: var(--paper-dark);
 .bit-display span.sign { background: var(--red); }
 .formula-note { margin-top: 22px; padding: 16px; background: var(--surface-code); font-family: var(--mono); font-size: 11px; line-height: 1.7; overflow-wrap: anywhere; }
 .memory-scene { position: relative; min-height: 430px; overflow: hidden; background: var(--navy-deep); border: 1px solid var(--navy); }
-.memory-scene canvas { display: block; width: 100%; height: 430px; }
+.scene-viewport { width: 100%; height: 430px; }
+.memory-scene canvas, .scene-fallback-canvas { display: block; width: 100%; height: 430px; }
 .scene-caption { position: absolute; left: 16px; bottom: 14px; padding: 7px 9px; background: rgb(16 40 60 / 88%); color: var(--paper); font-family: var(--mono); font-size: 9px; pointer-events: none; }
 .scene-loading { min-height: 430px; display: grid; place-items: center; color: var(--paper-light); background: var(--navy-deep); }
 .memory-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 11px; }

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import gsap from 'gsap';
@@ -14,14 +14,116 @@ interface DiskSceneProps {
 const TRACK_RADII = [3.65, 3.1, 2.55, 2.0, 1.45];
 const SECTORS_VISUAL = 12;
 
+function drawFallbackDisk2D(
+  canvas: HTMLCanvasElement,
+  platters: number,
+  selectedCylinder: number,
+  selectedSector: number,
+  phase: number,
+) {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#10283c';
+  ctx.fillRect(0, 0, w, h);
+
+  const safePlatters = Math.max(1, Math.min(6, Math.round(platters)));
+  const cylIdx = Math.max(0, Math.min(TRACK_RADII.length - 1, selectedCylinder));
+  const cx = w * 0.46;
+  const baseCy = h * 0.68;
+  const gapY = Math.min(46, 180 / Math.max(1, safePlatters));
+  const rxScale = Math.min(w * 0.32, 210) / 4.05;
+  const ryScale = rxScale * 0.4;
+  const cylRx = TRACK_RADII[cylIdx] * rxScale;
+  const cylRy = TRACK_RADII[cylIdx] * ryScale;
+
+  for (let p = 0; p < safePlatters; p++) {
+    const cy = baseCy - p * gapY;
+    // Plato elíptico isométrico
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 4.05 * rxScale, 4.05 * ryScale, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#6f92ae';
+    ctx.fill();
+    ctx.strokeStyle = '#d7e4ee';
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+
+    // Divisiones de sectores
+    for (let s = 0; s < SECTORS_VISUAL; s++) {
+      const a = phase + (s * Math.PI * 2) / SECTORS_VISUAL;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * 1.1 * rxScale, cy + Math.sin(a) * 1.1 * ryScale);
+      ctx.lineTo(cx + Math.cos(a) * 3.95 * rxScale, cy + Math.sin(a) * 3.95 * ryScale);
+      ctx.strokeStyle = 'rgba(16, 40, 60, 0.38)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // Pistas concéntricas
+    TRACK_RADII.forEach((r, idx) => {
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, r * rxScale, r * ryScale, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = idx === cylIdx ? '#b84635' : '#1b3b56';
+      ctx.lineWidth = idx === cylIdx ? 3 : 1;
+      ctx.stroke();
+    });
+
+    // Sector activo en el plato superior
+    if (p === safePlatters - 1) {
+      const a0 = phase + ((selectedSector % SECTORS_VISUAL) * Math.PI * 2) / SECTORS_VISUAL;
+      const a1 = a0 + (Math.PI * 2) / SECTORS_VISUAL;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, cylRx, cylRy, 0, a0, a1);
+      ctx.strokeStyle = '#f3c669';
+      ctx.lineWidth = 7;
+      ctx.stroke();
+    }
+  }
+
+  // Paredes verticales del cilindro activo uniendo todos los platos
+  const topCy = baseCy - (safePlatters - 1) * gapY;
+  ctx.fillStyle = 'rgba(199, 161, 84, 0.20)';
+  ctx.fillRect(cx - cylRx, topCy, cylRx * 2, (safePlatters - 1) * gapY);
+  ctx.strokeStyle = '#f3c669';
+  ctx.setLineDash([5, 4]);
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(cx - cylRx, topCy);
+  ctx.lineTo(cx - cylRx, baseCy);
+  ctx.moveTo(cx + cylRx, topCy);
+  ctx.lineTo(cx + cylRx, baseCy);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Eje central y brazo actuador
+  ctx.fillStyle = '#c7a154';
+  ctx.fillRect(cx - 8, topCy - 24, 16, (safePlatters - 1) * gapY + 34);
+
+  const armX = w * 0.84;
+  for (let p = 0; p < safePlatters; p++) {
+    const cy = baseCy - p * gapY - 3;
+    ctx.beginPath();
+    ctx.moveTo(armX, cy + 12);
+    ctx.lineTo(cx + cylRx, cy);
+    ctx.strokeStyle = '#e6dfd0';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.fillStyle = '#b84635';
+    ctx.fillRect(cx + cylRx - 5, cy - 4, 10, 8);
+  }
+}
+
 export default function DiskScene({ platters, selectedCylinder, selectedSector, rpm, spinning }: DiskSceneProps) {
   const mountRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<THREE.Scene | null>(null);
   const spindleGroupRef = useRef<THREE.Group | null>(null);
   const armPivotRef = useRef<THREE.Group | null>(null);
   const dynamicGroupRef = useRef<THREE.Group | null>(null);
   const spinParamsRef = useRef({ rpm, spinning });
   const reducedMotion = useRef(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const [webglFailed, setWebglFailed] = useState(false);
+  const fallbackCanvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     spinParamsRef.current = { rpm, spinning };
@@ -29,18 +131,30 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
 
   useEffect(() => {
     const mount = mountRef.current;
-    if (!mount) return undefined;
+    if (!mount || webglFailed) return undefined;
+
+    const width = Math.max(300, mount.clientWidth || 640);
+    const height = Math.max(360, mount.clientHeight || 430);
+
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    } catch {
+      setWebglFailed(true);
+      return undefined;
+    }
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#10283c');
-    scene.fog = new THREE.Fog('#10283c', 16, 34);
+    scene.fog = new THREE.Fog('#10283c', 16, 36);
 
-    const camera = new THREE.PerspectiveCamera(40, mount.clientWidth / Math.max(1, mount.clientHeight), 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
     camera.position.set(8.8, 6.8, 9.6);
+    camera.lookAt(0, 0, 0);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(mount.clientWidth, mount.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(width, height);
+    mount.innerHTML = '';
     mount.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -49,7 +163,7 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
     controls.minDistance = 6.5;
     controls.maxDistance = 22;
 
-    scene.add(new THREE.AmbientLight('#dce7f0', 1.35));
+    scene.add(new THREE.AmbientLight('#dce7f0', 1.4));
     const keyLight = new THREE.DirectionalLight('#ffffff', 1.7);
     keyLight.position.set(7, 11, 6);
     scene.add(keyLight);
@@ -57,7 +171,6 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
     goldRim.position.set(-8, 4, -6);
     scene.add(goldRim);
 
-    // Chasis inferior
     const chassis = new THREE.Mesh(
       new THREE.BoxGeometry(11.4, 0.35, 10.2),
       new THREE.MeshStandardMaterial({ color: '#173650', roughness: 0.65, metalness: 0.18 }),
@@ -78,15 +191,12 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
     scene.add(armPivot);
     armPivotRef.current = armPivot;
 
-    sceneRef.current = scene;
-
     let raf = 0;
     let last = performance.now();
     const animate = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       if (!reducedMotion.current && spinParamsRef.current.spinning && spindleGroupRef.current) {
-        // Escala didáctica suave proporcional a las RPM para distinguir sectores a simple vista
         const visualRadPerSec = (spinParamsRef.current.rpm / 7200) * 1.45;
         spindleGroupRef.current.rotation.y += visualRadPerSec * dt;
       }
@@ -98,9 +208,11 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
 
     const onResize = () => {
       if (!mountRef.current) return;
-      camera.aspect = mountRef.current.clientWidth / Math.max(1, mountRef.current.clientHeight);
+      const nw = Math.max(260, mountRef.current.clientWidth || 640);
+      const nh = Math.max(320, mountRef.current.clientHeight || 430);
+      camera.aspect = nw / nh;
       camera.updateProjectionMatrix();
-      renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
+      renderer.setSize(nw, nh);
     };
     const observer = new ResizeObserver(onResize);
     observer.observe(mount);
@@ -110,7 +222,9 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
       observer.disconnect();
       controls.dispose();
       renderer.dispose();
-      mount.removeChild(renderer.domElement);
+      if (renderer.domElement.parentNode === mount) {
+        mount.removeChild(renderer.domElement);
+      }
       scene.traverse((obj) => {
         const mesh = obj as THREE.Mesh;
         if (mesh.geometry) mesh.geometry.dispose();
@@ -120,9 +234,30 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
         }
       });
     };
-  }, []);
+  }, [webglFailed]);
 
   useEffect(() => {
+    if (!webglFailed) return undefined;
+    let raf = 0;
+    let phase = 0;
+    let last = performance.now();
+    const loop = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      if (!reducedMotion.current && spinParamsRef.current.spinning) {
+        phase += (spinParamsRef.current.rpm / 7200) * 1.2 * dt;
+      }
+      if (fallbackCanvasRef.current) {
+        drawFallbackDisk2D(fallbackCanvasRef.current, platters, selectedCylinder, selectedSector, phase);
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [webglFailed, platters, selectedCylinder, selectedSector]);
+
+  useEffect(() => {
+    if (webglFailed) return undefined;
     const spindleGroup = spindleGroupRef.current;
     const dynamicGroup = dynamicGroupRef.current;
     const armPivot = armPivotRef.current;
@@ -156,7 +291,6 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
     const totalHeight = (safePlatters - 1) * spacing;
     const startY = -totalHeight / 2;
 
-    // Eje motor central (spindle)
     const hub = new THREE.Mesh(
       new THREE.CylinderGeometry(0.68, 0.68, totalHeight + 1.25, 32),
       new THREE.MeshStandardMaterial({ color: '#c7a154', roughness: 0.3, metalness: 0.65 }),
@@ -168,7 +302,6 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
     for (let p = 0; p < safePlatters; p++) {
       const y = startY + p * spacing;
 
-      // Plato magnético
       const disc = new THREE.Mesh(
         new THREE.CylinderGeometry(4.05, 4.05, 0.09, 64),
         new THREE.MeshStandardMaterial({ color: '#7d9db8', roughness: 0.25, metalness: 0.72 }),
@@ -176,7 +309,6 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
       disc.position.y = y;
       spindleGroup.add(disc);
 
-      // Pistas concéntricas en cara superior
       TRACK_RADII.forEach((r, idx) => {
         const isSelectedTrack = idx === cylIdx;
         const ring = new THREE.Mesh(
@@ -191,7 +323,6 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
         spindleGroup.add(ring);
       });
 
-      // Divisiones radiales de sectores
       for (let s = 0; s < SECTORS_VISUAL; s++) {
         const ang = s * sectorAngle;
         const spoke = new THREE.Mesh(
@@ -203,7 +334,6 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
         spindleGroup.add(spoke);
       }
 
-      // Sector objetivo resaltado en el plato superior
       if (p === safePlatters - 1) {
         const wedge = new THREE.Mesh(
           new THREE.RingGeometry(activeRadius - 0.18, activeRadius + 0.18, 24, 1, secIdx * sectorAngle, sectorAngle * 0.88),
@@ -215,7 +345,6 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
       }
     }
 
-    // Cilindro traslúcido 3D atravesando verticalmente todas las caras en la pista seleccionada
     const cylWall = new THREE.Mesh(
       new THREE.CylinderGeometry(activeRadius, activeRadius, totalHeight + 0.55, 64, 1, true),
       new THREE.MeshStandardMaterial({
@@ -230,7 +359,6 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
     );
     dynamicGroup.add(cylWall);
 
-    // Actuador y peine de cabezales (2 cabezales por plato: cara superior e inferior)
     const actuatorPost = new THREE.Mesh(
       new THREE.CylinderGeometry(0.36, 0.42, totalHeight + 1.35, 24),
       new THREE.MeshStandardMaterial({ color: '#d7d1c3', roughness: 0.38, metalness: 0.5 }),
@@ -257,7 +385,6 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
       }
     }
 
-    // Giro radial del peine de cabezales según el cilindro elegido (búsqueda / seek)
     const targetRotY = (cylIdx - 2) * 0.11;
     if (reducedMotion.current) {
       armPivot.rotation.y = targetRotY;
@@ -266,11 +393,15 @@ export default function DiskScene({ platters, selectedCylinder, selectedSector, 
     }
 
     return undefined;
-  }, [platters, selectedCylinder, selectedSector]);
+  }, [platters, selectedCylinder, selectedSector, webglFailed]);
 
   return (
     <div className="memory-scene disk-scene" aria-label="Escena 3D de geometría de disco duro magnético">
-      <div ref={mountRef} />
+      {webglFailed ? (
+        <canvas ref={fallbackCanvasRef} width={760} height={430} className="scene-fallback-canvas" />
+      ) : (
+        <div className="scene-viewport" ref={mountRef} />
+      )}
       <div className="scene-caption">
         Oro traslúcido: cilindro activo ({platters * 2} pistas verticales) · Rojo: pista · Amarillo: sector · Arrastra para orbitar
       </div>

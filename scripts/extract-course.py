@@ -1108,10 +1108,6 @@ def write_json(name: str, payload: dict) -> None:
 def main() -> None:
     prepare_pdfs_and_covers()
 
-    # Limpiar figuras antiguas antes de regenerar
-    for old in OUT_FIGURES.glob("*.webp"):
-        old.unlink()
-
     t1 = parse_topic_1_or_2(1, "Representación de la información y estructura básica de un computador", skip_pages=2)
     t2 = parse_topic_1_or_2(2, "Unidad de memoria", skip_pages=4)
     t3 = parse_topic_3()
