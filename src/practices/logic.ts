@@ -252,3 +252,436 @@ export function ddrBw(freqMHz: number, widthBits: number): { rateMtps: number; b
   const bwGBs = (rateMtps * 1e6 * widthBits) / 8 / 1e9;
   return { rateMtps, bwGBs };
 }
+
+/* =========================================================================
+   NUEVOS LABORATORIOS: CACHÉ, HDD 3D, ENTRADA/SALIDA (DMA/IRQ) Y PIPELINE
+   ========================================================================= */
+
+export type CacheMapping = 'direct' | 'fully' | 'set';
+export type CachePolicy = 'LRU' | 'FIFO';
+
+export interface CacheLineState {
+  way: number;
+  valid: boolean;
+  block: number | null;
+  tag: string;
+  loadedAt: number;
+  lastUsed: number;
+  isLru: boolean;
+}
+
+export interface CacheAccessStep {
+  step: number;
+  addressHex: string;
+  addressDec: number;
+  addressBin: string;
+  tagBitsStr: string;
+  indexBitsStr: string;
+  offsetBitsStr: string;
+  block: number;
+  setIndex: number;
+  wayIndex: number;
+  hit: boolean;
+  evictedBlock: number | null;
+  lruBlockInSet: number | null;
+  setsSnapshot: CacheLineState[][];
+}
+
+export interface CacheSimulationResult {
+  addrBits: number;
+  tagBits: number;
+  indexBits: number;
+  offsetBits: number;
+  numBlocksMp: number;
+  numLines: number;
+  numSets: number;
+  ways: number;
+  hits: number;
+  misses: number;
+  hitRate: number;
+  tamNs: number;
+  steps: CacheAccessStep[];
+}
+
+function isPowerOfTwo(n: number): boolean {
+  return Number.isInteger(n) && n > 0 && (n & (n - 1)) === 0;
+}
+
+export function simulateCache(
+  mpBytes: number,
+  cacheBytes: number,
+  blockBytes: number,
+  mapping: CacheMapping,
+  waysInput: number,
+  policy: CachePolicy,
+  sequenceInput: string,
+  tcNs = 2,
+  missPenaltyNs = 60,
+): CacheSimulationResult {
+  if (!isPowerOfTwo(mpBytes) || !isPowerOfTwo(cacheBytes) || !isPowerOfTwo(blockBytes)) {
+    throw new Error('Los tamaños de memoria principal, caché y bloque deben ser potencias de 2.');
+  }
+  if (blockBytes > cacheBytes || cacheBytes > mpBytes) {
+    throw new Error('Debe cumplirse: Bloque ≤ Caché ≤ Memoria Principal.');
+  }
+  const numLines = cacheBytes / blockBytes;
+  const numBlocksMp = mpBytes / blockBytes;
+  const ways = mapping === 'direct' ? 1 : mapping === 'fully' ? numLines : waysInput;
+  if (!isPowerOfTwo(ways) || ways > numLines) {
+    throw new Error('El número de vías debe ser potencia de 2 y no superar el número de líneas.');
+  }
+  const numSets = numLines / ways;
+  const addrBits = Math.round(Math.log2(mpBytes));
+  const offsetBits = Math.round(Math.log2(blockBytes));
+  const indexBits = mapping === 'fully' ? 0 : Math.round(Math.log2(numSets));
+  const tagBits = addrBits - indexBits - offsetBits;
+
+  const tokens = sequenceInput
+    .split(/[\s,;→>-]+/)
+    .map((t) => t.trim())
+    .filter(Boolean);
+  if (tokens.length === 0 || tokens.length > 32) {
+    throw new Error('Introduce entre 1 y 32 direcciones (ej.: 0x02, 0x44, 0x0B, 0x80).');
+  }
+
+  const addresses = tokens.map((tok) => {
+    const clean = tok.toLowerCase().startsWith('0x') ? tok.slice(2) : tok;
+    if (!/^[0-9a-fA-F]+$/.test(clean)) throw new Error(`Dirección hexadecimal inválida: ${tok}`);
+    const val = parseInt(clean, 16);
+    if (val < 0 || val >= mpBytes) throw new Error(`La dirección 0x${clean.toUpperCase()} supera la memoria principal (${mpBytes} B).`);
+    return val;
+  });
+
+  const sets: CacheLineState[][] = Array.from({ length: numSets }, () =>
+    Array.from({ length: ways }, (_, w) => ({
+      way: w,
+      valid: false,
+      block: null,
+      tag: '',
+      loadedAt: 0,
+      lastUsed: 0,
+      isLru: false,
+    })),
+  );
+
+  const steps: CacheAccessStep[] = [];
+  let hits = 0;
+  let misses = 0;
+
+  const markLruFlags = (setLines: CacheLineState[]): number | null => {
+    setLines.forEach((ln) => { ln.isLru = false; });
+    const occupied = setLines.filter((ln) => ln.valid);
+    if (occupied.length === 0) return null;
+    const victim = occupied.reduce((best, cur) => {
+      const metricBest = policy === 'LRU' ? best.lastUsed : best.loadedAt;
+      const metricCur = policy === 'LRU' ? cur.lastUsed : cur.loadedAt;
+      return metricCur < metricBest ? cur : best;
+    });
+    victim.isLru = true;
+    return victim.block;
+  };
+
+  addresses.forEach((addr, idx) => {
+    const stepNo = idx + 1;
+    const bin = addr.toString(2).padStart(addrBits, '0');
+    const tagStr = bin.slice(0, tagBits);
+    const indexStr = indexBits > 0 ? bin.slice(tagBits, tagBits + indexBits) : '';
+    const offsetStr = bin.slice(tagBits + indexBits);
+    const block = Math.floor(addr / blockBytes);
+    const setIndex = numSets === 1 ? 0 : block % numSets;
+    const setLines = sets[setIndex];
+
+    const existingWay = setLines.findIndex((ln) => ln.valid && ln.tag === tagStr);
+    let hit = false;
+    let wayIndex = existingWay;
+    let evictedBlock: number | null = null;
+
+    if (existingWay !== -1) {
+      hit = true;
+      hits += 1;
+      setLines[existingWay].lastUsed = stepNo;
+    } else {
+      misses += 1;
+      const freeWay = setLines.findIndex((ln) => !ln.valid);
+      if (freeWay !== -1) {
+        wayIndex = freeWay;
+      } else {
+        const victim = setLines.reduce((best, cur) => {
+          const mBest = policy === 'LRU' ? best.lastUsed : best.loadedAt;
+          const mCur = policy === 'LRU' ? cur.lastUsed : cur.loadedAt;
+          return mCur < mBest ? cur : best;
+        });
+        wayIndex = victim.way;
+        evictedBlock = victim.block;
+      }
+      setLines[wayIndex] = {
+        way: wayIndex,
+        valid: true,
+        block,
+        tag: tagStr,
+        loadedAt: stepNo,
+        lastUsed: stepNo,
+        isLru: false,
+      };
+    }
+
+    const lruBlockInSet = markLruFlags(setLines);
+    const hexDigits = Math.max(2, Math.ceil(addrBits / 4));
+    steps.push({
+      step: stepNo,
+      addressHex: `0x${addr.toString(16).toUpperCase().padStart(hexDigits, '0')}`,
+      addressDec: addr,
+      addressBin: bin,
+      tagBitsStr: tagStr,
+      indexBitsStr: indexStr || '—',
+      offsetBitsStr: offsetStr,
+      block,
+      setIndex,
+      wayIndex,
+      hit,
+      evictedBlock,
+      lruBlockInSet,
+      setsSnapshot: sets.map((s) => s.map((ln) => ({ ...ln }))),
+    });
+  });
+
+  const hitRate = hits / addresses.length;
+  const tamNs = tcNs + (1 - hitRate) * missPenaltyNs;
+  return {
+    addrBits,
+    tagBits,
+    indexBits,
+    offsetBits,
+    numBlocksMp,
+    numLines,
+    numSets,
+    ways,
+    hits,
+    misses,
+    hitRate,
+    tamNs,
+    steps,
+  };
+}
+
+export function hddMetrics(
+  platters: number,
+  tracksPerSurface: number,
+  sectorsPerTrack: number,
+  bytesPerSector: number,
+  rpm: number,
+  seekMs: number,
+  sectorsToRead: number,
+) {
+  if (
+    !Number.isInteger(platters) || platters < 1 || platters > 12 ||
+    tracksPerSurface <= 0 || sectorsPerTrack <= 0 || bytesPerSector <= 0 ||
+    rpm <= 0 || seekMs < 0 || sectorsToRead <= 0
+  ) {
+    throw new Error('Introduce parámetros físicos positivos válidos.');
+  }
+  const surfaces = platters * 2;
+  const trackBytes = sectorsPerTrack * bytesPerSector;
+  const cylinderBytes = surfaces * trackBytes;
+  const totalBytes = cylinderBytes * tracksPerSurface;
+  const revMs = 60000 / rpm;
+  const avgRotMs = revMs / 2;
+  const sectorTransferMs = revMs / sectorsPerTrack;
+  const sequentialMs = seekMs + avgRotMs + sectorsToRead * sectorTransferMs;
+  const randomMs = sectorsToRead * (seekMs + avgRotMs + sectorTransferMs);
+  return {
+    surfaces,
+    trackBytes,
+    cylinderBytes,
+    totalBytes,
+    totalGB: totalBytes / 1e9,
+    totalGiB: totalBytes / (1024 ** 3),
+    revMs,
+    avgRotMs,
+    sectorTransferMs,
+    sequentialMs,
+    randomMs,
+    ratioRandomVsSeq: randomMs / sequentialMs,
+  };
+}
+
+export function ioComparison(
+  blockBytes: number,
+  devRateMBs: number,
+  instTimeNs: number,
+  pollInstPerByte: number,
+  irqInstPerByte: number,
+  dmaSetupTotalInst: number,
+  dmaCycleStealNs: number,
+) {
+  if (
+    blockBytes <= 0 || devRateMBs <= 0 || instTimeNs <= 0 ||
+    pollInstPerByte <= 0 || irqInstPerByte <= 0 || dmaSetupTotalInst < 0 || dmaCycleStealNs < 0
+  ) {
+    throw new Error('Introduce valores positivos válidos.');
+  }
+  const byteIntervalNs = 1e3 / devRateMBs; // ns entre bytes del periférico (1 MB/s = 10^6 B/s => 1000 ns/B)
+  const transferWallUs = (blockBytes * byteIntervalNs) / 1e3;
+
+  // E/S programada: la CPU espera activamente durante toda la transferencia
+  const pollCpuBusyUs = transferWallUs;
+  const pollFreeInst = 0;
+
+  // E/S por interrupciones: por cada byte ejecuta irqInstPerByte instrucciones
+  const irqPerByteNs = irqInstPerByte * instTimeNs;
+  const irqCpuBusyUs = (blockBytes * irqPerByteNs) / 1e3;
+  const irqSaturated = irqPerByteNs >= byteIntervalNs;
+  const irqFreeTimeNs = Math.max(0, blockBytes * (byteIntervalNs - irqPerByteNs));
+  const irqFreeInst = Math.floor(irqFreeTimeNs / instTimeNs);
+
+  // DMA por robo de ciclos: inicialización + final + robo de bus por byte
+  const dmaInitUs = (dmaSetupTotalInst * instTimeNs) / 1e3;
+  const dmaStealUs = (blockBytes * dmaCycleStealNs) / 1e3;
+  const dmaCpuBusyUs = dmaInitUs + dmaStealUs;
+  const dmaTotalWallUs = dmaInitUs + transferWallUs;
+  const dmaFreeDuringTransferNs = Math.max(0, blockBytes * (byteIntervalNs - dmaCycleStealNs));
+  const dmaFreeInst = Math.floor(dmaFreeDuringTransferNs / instTimeNs);
+
+  return {
+    byteIntervalNs,
+    transferWallUs,
+    pollCpuBusyUs,
+    pollCpuPct: 100,
+    pollFreeInst,
+    irqCpuBusyUs,
+    irqCpuPct: Math.min(100, (irqCpuBusyUs / transferWallUs) * 100),
+    irqSaturated,
+    irqFreeInst,
+    dmaInitUs,
+    dmaStealUs,
+    dmaCpuBusyUs,
+    dmaTotalWallUs,
+    dmaCpuPct: Math.min(100, (dmaCpuBusyUs / dmaTotalWallUs) * 100),
+    dmaFreeInst,
+  };
+}
+
+export type PipelineOp = 'LW' | 'ADD' | 'SUB' | 'SW' | 'OR';
+
+export interface PipelineInstSpec {
+  op: PipelineOp;
+  label: string;
+  dst: string | null;
+  src1: string | null;
+  src2: string | null;
+}
+
+export interface PipelineScheduleRow {
+  inst: PipelineInstSpec;
+  cells: Array<'IF' | 'ID' | 'EX' | 'MEM' | 'WB' | 'STALL' | ''>;
+  hazardNote: string | null;
+}
+
+export interface PipelineSimulationResult {
+  rows: PipelineScheduleRow[];
+  totalCycles: number;
+  nonPipelinedCycles: number;
+  stalls: number;
+  cpi: number;
+  speedup: number;
+}
+
+export function simulatePipeline(
+  instructions: PipelineInstSpec[],
+  forwarding: boolean,
+): PipelineSimulationResult {
+  if (instructions.length === 0 || instructions.length > 10) {
+    throw new Error('La secuencia debe tener entre 1 y 10 instrucciones.');
+  }
+
+  interface Scheduled {
+    spec: PipelineInstSpec;
+    ifCycle: number;
+    idCycle: number;
+    exCycle: number;
+    memCycle: number;
+    wbCycle: number;
+    stallCount: number;
+    note: string | null;
+  }
+
+  const scheduled: Scheduled[] = [];
+
+  for (let i = 0; i < instructions.length; i++) {
+    const cur = instructions[i];
+    const prev = scheduled[i - 1];
+    const ifCycle = i === 0 ? 1 : prev.idCycle; // Entra en IF cuando la anterior pasa a ID
+    const baseIdCycle = i === 0 ? 2 : Math.max(ifCycle + 1, prev.exCycle);
+
+    // Calcular cuándo están disponibles los operandos fuente respecto a productores previos
+    let requiredExCycle = baseIdCycle + 1;
+    const notes: string[] = [];
+
+    for (let p = Math.max(0, i - 2); p < i; p++) {
+      const prod = scheduled[p];
+      const reg = prod.spec.dst;
+      if (!reg || reg === 'x0') continue;
+      const depends = cur.src1 === reg || cur.src2 === reg;
+      if (!depends) continue;
+
+      if (!forwarding) {
+        // Sin anticipación: el dato se escribe en WB y puede leerse en el ciclo siguiente (o en la 2ª mitad de WB -> EX en wbCycle + 1)
+        const earliestEx = prod.wbCycle + 1;
+        if (earliestEx > requiredExCycle) {
+          requiredExCycle = earliestEx;
+        }
+        notes.push(`Espera ${reg} de I${p + 1} hasta WB`);
+      } else {
+        // Con anticipación: ALU produce al final de EX (disponible para EX siguiente en exCycle + 1); LW produce al final de MEM (disponible para EX en memCycle + 1)
+        const readyForEx = prod.spec.op === 'LW' ? prod.memCycle + 1 : prod.exCycle + 1;
+        if (readyForEx > requiredExCycle) {
+          requiredExCycle = readyForEx;
+          notes.push(`Riesgo load-use en ${reg} (1 burbuja + MEM→EX)`);
+        } else {
+          const path = prod.spec.op === 'LW' ? 'MEM→EX' : (prod.exCycle + 1 === requiredExCycle ? 'EX→EX' : 'MEM→EX');
+          notes.push(`Anticipación ${path} (${reg})`);
+        }
+      }
+    }
+
+    const stallCount = Math.max(0, requiredExCycle - (baseIdCycle + 1));
+    const exCycle = requiredExCycle;
+    const memCycle = exCycle + 1;
+    const wbCycle = memCycle + 1;
+
+    scheduled.push({
+      spec: cur,
+      ifCycle,
+      idCycle: baseIdCycle,
+      exCycle,
+      memCycle,
+      wbCycle,
+      stallCount,
+      note: notes.length ? notes.join(' · ') : null,
+    });
+  }
+
+  const totalCycles = scheduled[scheduled.length - 1].wbCycle;
+  const rows: PipelineScheduleRow[] = scheduled.map((item) => {
+    const cells: Array<'IF' | 'ID' | 'EX' | 'MEM' | 'WB' | 'STALL' | ''> = Array(totalCycles).fill('');
+    cells[item.ifCycle - 1] = 'IF';
+    for (let c = item.ifCycle + 1; c < item.idCycle; c++) cells[c - 1] = 'STALL';
+    cells[item.idCycle - 1] = 'ID';
+    for (let c = item.idCycle + 1; c < item.exCycle; c++) cells[c - 1] = 'STALL';
+    cells[item.exCycle - 1] = 'EX';
+    cells[item.memCycle - 1] = 'MEM';
+    cells[item.wbCycle - 1] = 'WB';
+    return {
+      inst: item.spec,
+      cells,
+      hazardNote: item.note,
+    };
+  });
+
+  const nonPipelinedCycles = instructions.length * 5;
+  const stalls = scheduled.reduce((acc, s) => acc + s.stallCount, 0);
+  const cpi = totalCycles / instructions.length;
+  const speedup = nonPipelinedCycles / totalCycles;
+
+  return { rows, totalCycles, nonPipelinedCycles, stalls, cpi, speedup };
+}

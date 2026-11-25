@@ -98,3 +98,48 @@ describe('rendimiento y memoria', () => {
     expect(L.ddrBw(1600, 64).rateMtps).toBe(3200);
   });
 });
+
+describe('memoria caché, HDD, E/S y segmentación', () => {
+  it('reproduce exactamente el problema UNED de caché asociativa 2 vías (LRU vs FIFO)', () => {
+    const lru = L.simulateCache(256, 64, 16, 'set', 2, 'LRU', '0x02, 0x44, 0x0B, 0x80');
+    expect([lru.tagBits, lru.indexBits, lru.offsetBits]).toEqual([3, 1, 4]);
+    expect(lru.steps.map((s) => s.hit)).toEqual([false, false, true, false]);
+    // En 0x80 con LRU se expulsa B4 y queda B0 como LRU
+    expect(lru.steps[3].evictedBlock).toBe(4);
+    expect(lru.steps[3].lruBlockInSet).toBe(0);
+
+    const fifo = L.simulateCache(256, 64, 16, 'set', 2, 'FIFO', '0x02, 0x44, 0x0B, 0x80');
+    // Con FIFO en 0x80 se expulsa B0 (el primero en llegar)
+    expect(fifo.steps[3].evictedBlock).toBe(0);
+  });
+
+  it('calcula geometría y tiempos secuencial vs aleatorio en HDD', () => {
+    const hdd = L.hddMetrics(4, 20000, 500, 512, 7200, 6, 250);
+    expect(hdd.surfaces).toBe(8);
+    expect(hdd.totalGB).toBeCloseTo(40.96, 5);
+    expect(hdd.revMs).toBeCloseTo(8.3333, 3);
+    expect(hdd.sequentialMs).toBeCloseTo(14.3333, 3);
+    expect(hdd.randomMs).toBeGreaterThan(hdd.sequentialMs * 100);
+  });
+
+  it('compara E/S programada, interrupciones y DMA por robo de ciclos', () => {
+    const io = L.ioComparison(500, 1.5, 200, 4, 25, 10, 100);
+    // 10 inst * 200 ns = 2 us; 500 * 100 ns = 50 us => 52 us ocupado en DMA
+    expect(io.dmaCpuBusyUs).toBeCloseTo(52, 5);
+    // Tiempo libre durante transferencia: 500 * (666.666... - 100) ns / 200 ns = 1416 instrucciones completas
+    expect(io.dmaFreeInst).toBe(1416);
+  });
+
+  it('simula riesgos de datos en pipeline con y sin forwarding', () => {
+    const seq: L.PipelineInstSpec[] = [
+      { op: 'LW', label: 'lw x1, 0(x2)', dst: 'x1', src1: 'x2', src2: null },
+      { op: 'ADD', label: 'add x3, x1, x4', dst: 'x3', src1: 'x1', src2: 'x4' },
+      { op: 'SUB', label: 'sub x5, x3, x6', dst: 'x5', src1: 'x3', src2: 'x6' },
+    ];
+    const noFwd = L.simulatePipeline(seq, false);
+    const fwd = L.simulatePipeline(seq, true);
+    expect(fwd.stalls).toBe(1); // Solo 1 burbuja por load-use LW -> ADD; ADD -> SUB se resuelve por EX->EX
+    expect(noFwd.stalls).toBeGreaterThan(fwd.stalls);
+    expect(fwd.totalCycles).toBe(8); // 3 + 4 + 1 stall = 8 ciclos
+  });
+});

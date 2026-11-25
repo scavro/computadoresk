@@ -1,25 +1,23 @@
 # Fundamentos de Computadores
 
-Web local de estudio para la asignatura **Fundamentos de Computadores (7103104-)** del Grado en Ingeniería en Inteligencia Artificial de la UNED.
+Web de estudio estilo *Álbum técnico de laboratorio* para la asignatura **Fundamentos de Computadores (7103104-)** del Grado en Ingeniería en Inteligencia Artificial de la UNED.
 
-La primera versión funcional está implementada: apuntes, ejercicios, examen, prácticas y progreso local.
+## Contenido incluido (Bloque I completo)
 
-## Contenido previsto
-
-- Apuntes completos del Tema 1.
-- Tema 2, parte 1 disponible.
-- Ejemplos y ejercicios resueltos de los apuntes.
-- Ejercicios propuestos del Tema 1 con soluciones separadas.
-- 15 ejercicios nuevos tipo examen con soluciones.
-- Prácticas interactivas en el navegador.
-- Progreso guardado localmente.
-
-Consulta el plan completo en [PLAN.md](PLAN.md).
-
-## Requisitos
-
-- Node.js 24 (versión utilizada en integración continua).
-- npm.
+- **Apuntes completos de los Temas 1, 2, 3 y 4**, con ejemplos encuadrados, notas, figuras extraídas y referencias directas de página a los PDFs encuadernados con sus portadas:
+  - **Tema 1:** Representación de la información y estructura básica de un computador (92 págs., 48 ejemplos, 12 figuras).
+  - **Tema 2:** Unidad de memoria completa, incluyendo memoria caché, asociativa y secundaria HDD/SSD/ópticos/cinta (138 págs., 32 ejemplos, 44 figuras).
+  - **Tema 3:** Unidad de entrada/salida: controladores, E/S programada, interrupciones, DMA, canales y GPU (82 págs., 25 ejemplos, 22 figuras).
+  - **Tema 4:** Unidad central de procesamiento: puertas y ALU, repertorios RISC-V/ARM/x86-64, modos de direccionamiento, ruta de datos, segmentación, unidad de control y GPUs/NPUs/TPUs (92 págs., 21 figuras).
+- **91 ejercicios oficiales resueltos + cuestionario interactivo**:
+  - 27 ejercicios del Tema 1 con soluciones separadas.
+  - 45 ejercicios del Tema 2 + problema adicional de caché asociativa por conjuntos (LRU frente a FIFO) + **cuestionario interactivo de 10 preguntas sobre memoria caché**.
+  - 18 actividades de autoevaluación y problemas del Tema 3 con soluciones.
+- **Banco tipo examen de 25 problemas originales (`E01`–`E25`)** repartidos por los 4 temas, con simulacro cronometrado de 5 problemas en 120 minutos.
+- **12 prácticas interactivas (`P01`–`P12`)**:
+  - Conversores, enteros, coma fija/IEEE 754, multimedia, procesador/buses, memoria y DDR.
+  - **2 escenas 3D interactivas con Three.js:** bancos de chips con decodificador (`P07`) y geometría física de disco duro magnético con platos, cilindros, pistas y sectores (`P10`).
+  - **Simuladores interactivos SVG + GSAP:** memoria caché paso a paso (`P09`), comparador de E/S programada / interrupciones / DMA por robo de ciclos (`P11`) y ruta de datos / segmentación RISC de 5 etapas con *forwarding* (`P12`).
 
 ## Puesta en marcha
 
@@ -28,42 +26,20 @@ npm install
 npm run dev
 ```
 
-La dirección local aparecerá en la terminal, normalmente `http://localhost:5173`.
-
-## Comandos previstos
+## Comandos principales
 
 ```bash
-npm run dev            # Servidor local
-npm run build          # Compilación de producción
-npm run preview        # Vista previa de la compilación
-npm run test           # Pruebas
-npm run lint           # Comprobaciones de código
-npm run content:extract # Regenera el contenido local desde los PDF originales
-npm run content:check   # Comprueba apuntes, ejercicios y PDF antes de publicar
+npm run dev             # Servidor local de desarrollo
+npm run build           # Verificación de contenido + compilación de producción
+npm run preview         # Vista previa local de dist/
+npm run test            # Pruebas unitarias (Vitest)
+npm run lint            # Análisis estático (ESLint)
+npm run smoke           # Prueba end-to-end en navegador (Playwright)
+npm run content:extract # Regenera JSONs, figuras WebP y PDFs con portadas desde APUNTES/
+npm run content:check   # Verifica apuntes, figuras, portadas, ejercicios y PDFs
 ```
-
-## Estructura
-
-El contenido de los apuntes y ejercicios se encuentra en `public/content/`, separado de la interfaz en `src/`. Los PDF originales están en `public/fuentes/`. Ambos directorios están versionados y se incluyen en la compilación de producción.
-
-## Material docente
-
-Los apuntes, ejercicios y soluciones originales pertenecen a su equipo docente y a la UNED. Se incluyen en este repositorio y en la web desplegada como apoyo al estudio personal; no son publicaciones oficiales de la asignatura. El contenido extraído puede regenerarse con `npm run content:extract` desde los PDF de `public/fuentes/`.
-
-## Estado
-
-- [x] Planificación inicial.
-- [x] Repositorio Git preparado.
-- [x] Fase 1: base de la aplicación.
-- [x] Fase 2: apuntes.
-- [x] Fase 3: ejercicios existentes.
-- [x] Fase 4: banco de examen.
-- [x] Fase 5: prácticas interactivas.
-- [x] Fase 6: pruebas y accesibilidad.
-- [x] Fase 7: publicación.
 
 ## Publicación
 
 - Repositorio: [scavro/computadoresk](https://github.com/scavro/computadoresk) (rama `main`).
-- Despliegue: Cloudflare Pages conectado al repositorio; cada push a `main` reconstruye y publica la web automáticamente.
-- El despliegue público incluye el material docente completo (apuntes, ejercicios y PDFs originales) para estudiar desde cualquier equipo.
+- Despliegue continuo en Cloudflare Pages al hacer `push` a `main`.

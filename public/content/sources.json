@@ -1,44 +1,102 @@
 {
   "documents": [
     {
-      "id": "tema-1",
-      "title": "Apuntes del Tema 1",
-      "file": "tema-1.pdf",
-      "pages": 92,
-      "description": "Representación de la información y estructura básica de un computador."
+      "id": "portadas",
+      "title": "Portadas del Bloque I",
+      "file": "portadas.pdf",
+      "pages": 5,
+      "description": "Portada general de la asignatura y portadillas editoriales de los Temas 1 a 4."
     },
     {
-      "id": "tema-2",
-      "title": "Apuntes del Tema 2 · Parte 1",
-      "file": "tema-2.pdf",
-      "pages": 49,
-      "description": "Unidad de memoria hasta módulos y DDR SDRAM."
+      "id": "tema-1",
+      "title": "Apuntes del Tema 1 (con portada)",
+      "file": "tema-1.pdf",
+      "pages": 93,
+      "description": "Representación de la información y estructura básica de un computador."
     },
     {
       "id": "ejercicios-1",
       "title": "Ejercicios del Tema 1",
       "file": "ejercicios-tema-1.pdf",
-      "description": "Los 27 enunciados originales."
+      "pages": 4,
+      "description": "Los 27 enunciados propuestos del Tema 1."
     },
     {
       "id": "soluciones-1",
       "title": "Soluciones del Tema 1",
       "file": "soluciones-tema-1.pdf",
-      "description": "Desarrollo oficial de los 27 ejercicios."
+      "pages": 35,
+      "description": "Desarrollo completo de los 27 ejercicios del Tema 1."
+    },
+    {
+      "id": "tema-2",
+      "title": "Apuntes del Tema 2 completo (con portada)",
+      "file": "tema-2.pdf",
+      "pages": 139,
+      "description": "Unidad de memoria: conceptos, semiconductores, módulos DDR, memoria caché, asociativa y secundaria (HDD/SSD/ópticos/cinta)."
+    },
+    {
+      "id": "ejercicios-2",
+      "title": "Ejercicios del Tema 2",
+      "file": "ejercicios-tema-2.pdf",
+      "pages": 12,
+      "description": "Los 45 enunciados propuestos de la Unidad de memoria."
+    },
+    {
+      "id": "soluciones-2",
+      "title": "Soluciones del Tema 2",
+      "file": "soluciones-tema-2.pdf",
+      "pages": 69,
+      "description": "Desarrollo completo de los 45 ejercicios del Tema 2."
+    },
+    {
+      "id": "ejercicios-cache-2",
+      "title": "Problema y cuestionario extra de Memoria Caché (Tema 2)",
+      "file": "ejercicios-cache-tema-2.pdf",
+      "pages": 5,
+      "description": "Problema de caché asociativa por conjuntos (LRU vs FIFO) y 10 preguntas de autoevaluación."
+    },
+    {
+      "id": "tema-3",
+      "title": "Apuntes del Tema 3 completo (con portada)",
+      "file": "tema-3.pdf",
+      "pages": 83,
+      "description": "Unidad de entrada/salida: controladores, E/S programada, interrupciones, DMA, procesadores de E/S y GPU."
+    },
+    {
+      "id": "ejercicios-3",
+      "title": "Ejercicios y autoevaluación del Tema 3",
+      "file": "ejercicios-tema-3.pdf",
+      "pages": 6,
+      "description": "9 cuestiones de autoevaluación y 9 problemas de Entrada/Salida."
+    },
+    {
+      "id": "soluciones-3",
+      "title": "Soluciones del Tema 3",
+      "file": "soluciones-tema-3.pdf",
+      "pages": 14,
+      "description": "Soluciones razonadas de las 18 actividades del Tema 3."
+    },
+    {
+      "id": "tema-4",
+      "title": "Apuntes del Tema 4 completo (con portada)",
+      "file": "tema-4.pdf",
+      "pages": 93,
+      "description": "Unidad central de procesamiento: puertas y ALU, repertorios RISC-V/ARM/x86-64, ruta de datos, segmentación, control y GPUs/NPUs."
     },
     {
       "id": "informacion",
-      "title": "Información básica",
+      "title": "Información básica 2026–2027",
       "file": "informacion-basica.pdf",
       "pages": 2,
-      "description": "Temario, evaluación y material permitido."
+      "description": "Temario oficial de 10 temas, evaluación y normas del examen presencial."
     },
     {
       "id": "guia",
-      "title": "Guía docente 2026–2027",
+      "title": "Guía docente completa 2026–2027",
       "file": "guia.pdf",
       "pages": 12,
-      "description": "Competencias, metodología, plan de trabajo y evaluación."
+      "description": "Equipo docente, competencias, plan de trabajo de 150 horas y bibliografía."
     }
   ]
 }

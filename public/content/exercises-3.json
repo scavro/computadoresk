@@ -1,0 +1,779 @@
+{
+  "topic": 3,
+  "exercises": [
+    {
+      "id": "3.1",
+      "number": "3.1",
+      "origin": "Autoevaluación UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.1. Indique si las siguientes afirmaciones son verdaderas o falsas y justifique\ncada cuestión en un máximo de 4 líneas."
+        },
+        {
+          "type": "paragraph",
+          "text": "A) En la E/S aislada de memoria con n líneas el espacio de 2ⁿ direcciones se divide\n         entre direcciones disponibles para la memoria principal y direcciones asignadas a\n         los periféricos.\n      B) Una excepción por división por cero es un evento asíncrono respecto al programa\n         en ejecución, igual que una interrupción hardware.\n      C) Con interrupciones no anidables, una petición de mayor prioridad que llega durante\n         una RSI de menor prioridad la interrumpe de inmediato.\n      D) La identificación de la fuente de interrupción por encuesta establece de forma\n         implícita un esquema de prioridades entre los periféricos."
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nA) Falso: En la E/S aislada las líneas de control de memoria y de E/S son\nindependientes, así que ambos espacios pueden tener hasta 2ⁿ direcciones (NDM = NDP\n= 2ⁿ). Es en la E/S localizada en memoria donde ND = NDM + NDP y se divide el rango de\ndirecciones posibles."
+        },
+        {
+          "type": "paragraph",
+          "text": "B) Falso: Una excepción la genera el propio procesador al ejecutar una instrucción no\npermitida, por lo que es síncrona: si el programa se repite con los mismos datos, ocurre\nsiempre en el mismo punto. Las interrupciones hardware, por el contrario, sí son asíncronas."
+        },
+        {
+          "type": "paragraph",
+          "text": "C) Falso: Con un único nivel la RSI en curso no puede interrumpirse, sea cual sea la\nprioridad de la nueva petición. La petición queda retenida y, al terminar la rutina, se atiende\nla pendiente de mayor prioridad."
+        },
+        {
+          "type": "paragraph",
+          "text": "D) Verdadero: El programa de servicio interroga a los controladores en un orden fijo y\nsalta a la RSI del primero que ha interrumpido. Los periféricos consultados antes tienen,\npor tanto, mayor prioridad."
+        }
+      ]
+    },
+    {
+      "id": "3.2",
+      "number": "3.2",
+      "origin": "Autoevaluación UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.2. Un computador tiene 20 líneas de dirección, una memoria de 512 Ki\nunidades direccionables y usa E/S localizada en memoria. Si cada periférico ocupa 4\ndirecciones, el número máximo de periféricos es:"
+        },
+        {
+          "type": "paragraph",
+          "text": "A) 2¹⁷"
+        },
+        {
+          "type": "paragraph",
+          "text": "B) 2¹⁸"
+        },
+        {
+          "type": "paragraph",
+          "text": "C) 2¹⁶"
+        },
+        {
+          "type": "paragraph",
+          "text": "D) 2¹⁹"
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nLa respuesta correcta es la A) 2¹⁷ ya que con 20 líneas ND = 2²⁰ y dado que NDM =\n512 Ki = 2¹⁹ entonces NDP = 2²⁰ − 2¹⁹ = 2¹⁹ direcciones."
+        },
+        {
+          "type": "paragraph",
+          "text": "Como hay 4 (2²) direcciones por periférico el total de periféricos posibles es:"
+        },
+        {
+          "type": "paragraph",
+          "text": "2¹⁹ / 2² = 2¹⁷ = 131.072 periféricos."
+        }
+      ]
+    },
+    {
+      "id": "3.3",
+      "number": "3.3",
+      "origin": "Autoevaluación UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.3. ¿Cuál de las siguientes acciones NO forma parte del ciclo de atención de\nuna interrupción? Justifique cada cuestión en un máximo de 4 líneas:"
+        },
+        {
+          "type": "paragraph",
+          "text": "A) Salvar el contexto"
+        },
+        {
+          "type": "paragraph",
+          "text": "B) Inhibir las interrupciones"
+        },
+        {
+          "type": "paragraph",
+          "text": "C) Ceder el bus al controlador de DMA"
+        },
+        {
+          "type": "paragraph",
+          "text": "D) Elevar el nivel de privilegio"
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nLa respuesta correcta es la C). Ceder el bus al DMA ocurre en los puntos de ruptura\nde DMA y NO requiere cambio de contexto. Salvar el contexto, inhibir las interrupciones y\nelevar el privilegio sí son pasos del ciclo de atención de una interrupción."
+        }
+      ]
+    },
+    {
+      "id": "3.4",
+      "number": "3.4",
+      "origin": "Autoevaluación UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.4. Una CPU tiene 8 líneas cuyo orden de prioridad es PI₁ > PI₂ > … > PI₈ y\nusa enmascaramiento individual (bit más significativo = PI₁, donde 1 significa permitida y 0\ninhibida). La máscara vale 5A₁₆ y llegan a la vez peticiones por PI₁, PI₃ y PI₅. Se atiende:"
+        },
+        {
+          "type": "paragraph",
+          "text": "A) PI₁"
+        },
+        {
+          "type": "paragraph",
+          "text": "B) PI₃"
+        },
+        {
+          "type": "paragraph",
+          "text": "C) PI₅"
+        },
+        {
+          "type": "paragraph",
+          "text": "D) Ninguna de las anteriores"
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nLa respuesta correcta es la C). La máscara en binario es 5A₁₆ = 0101 1010₂.\nSi comprobamos las interrupciones en orden de prioridad M₁ = 0, M₃ = 0 y M₅ = 1. Las dos\nprimeras PI₁, PI₃ aunque sean más prioritarias están enmascaradas, luego no se atienden\nen ese momento. Solo PI₅ está habilitada y se atiende."
+        }
+      ]
+    },
+    {
+      "id": "3.5",
+      "number": "3.5",
+      "origin": "Autoevaluación UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.5. Indique si las siguientes afirmaciones son verdaderas o falsas y justifique\ncada cuestión en un máximo de 4 líneas."
+        },
+        {
+          "type": "paragraph",
+          "text": "A) En el enmascaramiento por nivel se atiende una interrupción cuyo nivel C es igual\n       al nivel de ejecución A de la CPU.\n   B) Cuando la CPU cede el bus al controlador de DMA en un punto de ruptura de DMA,\n       debe salvar su contexto igual que al atender una interrupción.\n   C) Al sustituir la E/S por interrupciones por DMA en la lectura de un bloque de disco, el\n       tiempo total de la operación se reduce drásticamente."
+        },
+        {
+          "type": "paragraph",
+          "text": "D) Con una GPU dedicada, el refresco de la pantalla sigue consumiendo ancho de\n       banda del bus del sistema, aunque la imagen no cambie."
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nA) Falso: La regla exige que C sea estrictamente mayor que A. Así, una RSI que eleva\n        A hasta su propio nivel bloquea las interrupciones de prioridad igual o inferior,\n        incluida ella misma. La lógica es evitar que dos interrupciones del mismo tipo\n        puedan solaparse."
+        },
+        {
+          "type": "paragraph",
+          "text": "B) Falso: En un punto de ruptura de DMA la CPU solo deja de usar el bus y retoma\n        su actividad al recuperarlo. De esta forma no hay que cambiar el contexto ni guardar\n        registros, por ese motivo el arbitraje es mucho más ligero que una interrupción."
+        },
+        {
+          "type": "paragraph",
+          "text": "C) Falso: En la lectura de un bloque domina el tiempo de acceso del dispositivo, y en\n        una lectura secuencial el tiempo total es prácticamente el mismo. Lo que reduce el\n        DMA es el tiempo de CPU dedicado a la E/S, porque la CPU no copia los datos."
+        },
+        {
+          "type": "paragraph",
+          "text": "D) Falso. Cuando se usa una GPU la imagen se almacena en la VRAM de la tarjeta y\n        el controlador de pantalla lo lee por el bus de memoria de la GPU. Si la imagen no\n        cambia, la GPU refresca la pantalla por sí misma sin usar el bus del sistema ni la\n        CPU."
+        }
+      ]
+    },
+    {
+      "id": "3.6",
+      "number": "3.6",
+      "origin": "Autoevaluación UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.6. Indique cuál de estas afirmaciones es verdadera y justifique cada\ncuestión en un máximo de 4 líneas: La principal ventaja de las interrupciones señaladas por\nmensaje (MSI) es que:"
+        },
+        {
+          "type": "paragraph",
+          "text": "A) Eliminan el controlador de interrupciones"
+        },
+        {
+          "type": "paragraph",
+          "text": "B) Identifican la fuente sin líneas físicas dedicadas"
+        },
+        {
+          "type": "paragraph",
+          "text": "C) Eliminan el cambio de contexto"
+        },
+        {
+          "type": "paragraph",
+          "text": "D) Acortan la RSI"
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nLa respuesta correcta es la B) El mensaje lleva la dirección del controlador de\ninterrupciones y un vector propio de cada fuente, así que la identifica directamente. Se\nobtienen las ventajas de las múltiples líneas sin cableado adicional. El controlador, el\ncambio de contexto y la RSI siguen existiendo."
+        }
+      ]
+    },
+    {
+      "id": "3.7",
+      "number": "3.7",
+      "origin": "Autoevaluación UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.7. ¿Qué estrategia clásica de DMA no altera en absoluto la velocidad de\nejecución de la CPU?"
+        },
+        {
+          "type": "paragraph",
+          "text": "A) Ráfagas con parada del procesador"
+        },
+        {
+          "type": "paragraph",
+          "text": "B) Robo de ciclos"
+        },
+        {
+          "type": "paragraph",
+          "text": "C) DMA transparente"
+        },
+        {
+          "type": "paragraph",
+          "text": "D) Ninguna de las anteriores"
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nLa respuesta correcta es la C). El DMA transparente solo usa el bus en las fases del\nciclo de instrucción en que la CPU no lo necesita, de modo que nunca le quita un ciclo de\nbus. El precio es una velocidad de transferencia menor que la de ráfagas."
+        }
+      ]
+    },
+    {
+      "id": "3.8",
+      "number": "3.8",
+      "origin": "Autoevaluación UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.8. Un programa escribe un mensaje en un buffer con caché de post-escritura\ny sin coherencia de E/S por hardware. Antes de que el DMA lo envíe a la tarjeta de red, el\ndriver debe:"
+        },
+        {
+          "type": "paragraph",
+          "text": "A) Invalidar las líneas del buffer"
+        },
+        {
+          "type": "paragraph",
+          "text": "B) Limpiar (flush) las líneas del buffer"
+        },
+        {
+          "type": "paragraph",
+          "text": "C) No tiene que hacer nada"
+        },
+        {
+          "type": "paragraph",
+          "text": "D) Inhibir las interrupciones"
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nLa respuesta correcta es la B) Con post-escritura los datos nuevos pueden estar solo\nen la caché (líneas sucias) y la memoria tener valores antiguos. El driver debe escribirlos\nen memoria (clean/flush) antes de que el DMA lea, o enviaría basura. Invalidar sería\nnecesario en una lectura desde el dispositivo."
+        }
+      ]
+    },
+    {
+      "id": "3.9",
+      "number": "3.9",
+      "origin": "Autoevaluación UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.9. Un canal multiplexor controla dos dispositivos de 50 MB/s y dos de 20\nMB/s. Su velocidad máxima teórica es:"
+        },
+        {
+          "type": "paragraph",
+          "text": "A) 50 MB/s"
+        },
+        {
+          "type": "paragraph",
+          "text": "B) 70 MB/s"
+        },
+        {
+          "type": "paragraph",
+          "text": "C) 140 MB/s"
+        },
+        {
+          "type": "paragraph",
+          "text": "D) 200 MB/s"
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nLa respuesta correcta es la C) 140 MB/s. Un canal multiplexor atiende a todos sus\ndispositivos de forma entrelazada, así que su velocidad máxima es la suma de todos ellos:\n50 + 50 + 20 + 20 = 140 MB/s. Un canal selector solo llegaría a 50 MB/s, la del dispositivo\nmás rápido."
+        }
+      ]
+    },
+    {
+      "id": "3.10",
+      "number": "3.10",
+      "origin": "Problema UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.10. Espacio de direcciones. Un computador tiene 24 líneas de dirección, 12\nMiB de memoria cuya unidad direccionable es el byte y utiliza E/S localizada en memoria."
+        },
+        {
+          "type": "paragraph",
+          "text": "A) ¿Cuántos periféricos de 4 direcciones pueden conectarse?"
+        },
+        {
+          "type": "paragraph",
+          "text": "B) ¿Y si usara E/S aislada con un espacio de puertos de 16 bits?"
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nApartado A)"
+        },
+        {
+          "type": "paragraph",
+          "text": "ND = 2²⁴ = 16 Mi direcciones, por otra parte, NDM = 12 MiB = 12 · 2²⁰."
+        },
+        {
+          "type": "paragraph",
+          "text": "Como la E/S está localizada en memoria las direcciones de los dispositivos se obtienen\nrestando del espacio total de direcciones las ocupadas por la memoria:"
+        },
+        {
+          "type": "paragraph",
+          "text": "NDP =ND-NDM= 16 · 2²⁰ − 12 · 2²⁰ = 4 · 2²⁰ = 2²²."
+        },
+        {
+          "type": "paragraph",
+          "text": "Como cada dispositivo usa 4 direcciones el número máximo de dispositivos es"
+        },
+        {
+          "type": "paragraph",
+          "text": "Nº máximo =2²² / 4 = 2²² / 2² = 2²⁰ = 1.048.576 periféricos."
+        },
+        {
+          "type": "paragraph",
+          "text": "Apartado B)"
+        },
+        {
+          "type": "paragraph",
+          "text": "Con E/S aislada el espacio de puertos es independiente de la memoria, si se dispone\nde 16 bits para los puertos NDP = 2¹⁶ = 65.536 direcciones."
+        },
+        {
+          "type": "paragraph",
+          "text": "Y por lo tanto"
+        },
+        {
+          "type": "paragraph",
+          "text": "Nº máximo = 2¹⁶ / 4 =2¹⁶ / 2² = 2¹⁴ = 16.384 periféricos."
+        }
+      ]
+    },
+    {
+      "id": "3.11",
+      "number": "3.11",
+      "origin": "Problema UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.11. El SO programa el reloj para interrumpir a la CPU 1000 veces por\nsegundo. Cada interrupción supone dos cambios de contexto de 0,5 µs y una rutina de\ninterrupción RSI de 2 µs."
+        },
+        {
+          "type": "paragraph",
+          "text": "A) Calcule la sobrecarga en estas condiciones."
+        },
+        {
+          "type": "paragraph",
+          "text": "B) ¿Qué sobrecarga habría con un tic de 10 kHz?"
+        },
+        {
+          "type": "paragraph",
+          "text": "C) ¿Cuál es la frecuencia de tic máxima para que la sobrecarga no supere el 1 %?"
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nApartado A) Cada tic cuesta dos cambios de contexto y un tiempo de RSI es decir"
+        },
+        {
+          "type": "paragraph",
+          "text": "Tint= 0,5 µs + 2 µs + 0,5 µs = 3 µs."
+        },
+        {
+          "type": "paragraph",
+          "text": "En un segundo hay 1000 interrupciones luego el tiempo total consumido en la E/S es"
+        },
+        {
+          "type": "paragraph",
+          "text": "1000 · 3 µs = 3 ms, así que la sobrecarga es 3 ms / 1000 ms x 100%= 0,3 %."
+        },
+        {
+          "type": "paragraph",
+          "text": "Apartado B) Con 10.000 tics por segundo: 10.000 · 3 µs = 30 ms (es decir 10 veces\nmás) luego la sobrecarga es el 3 %."
+        },
+        {
+          "type": "paragraph",
+          "text": "Apartado C) Si llamamos a la frecuencia del tic f entonces en 1 segundo hay 3f µs/s\nde sobrecarga. Por otra parte, un 1% de sobrecarga en un segundo son:"
+        },
+        {
+          "type": "paragraph",
+          "text": "1s/s x1%=106 µs/s x 1/100 =104µs/s"
+        },
+        {
+          "type": "paragraph",
+          "text": "Luego queremos que"
+        },
+        {
+          "type": "paragraph",
+          "text": "3f µs ≤ 10.000 µs/s → f ≤ 10.000 / 3 Hz = 3.333 Hz."
+        }
+      ]
+    },
+    {
+      "id": "3.12",
+      "number": "3.12",
+      "origin": "Problema UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.12. Un microcontrolador a 8 MHz que ejecuta una instrucción por ciclo mide\nla temperatura de un invernadero periódicamente. Cada medida, incluida la RSI que lo\ndespierta, ejecuta 400 instrucciones, a continuación, duerme durante 0,5 s en un estado de\nbajo consumo. En modo normal consume 5000 veces más que en bajo consumo. Calcule\nel ahorro porcentual de energía frente a una espera activa y cuántas veces más duraría la\nbatería."
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nSe toma como unidad de energía (ue) lo que consume el microcontrolador en un\nsegundo en bajo consumo, de esta forma en modo normal consume 5000 ue/s."
+        },
+        {
+          "type": "paragraph",
+          "text": "El tiempo que la CPU permanece activa por medida es\n           tcpu = 400 instrucciones x1 ciclo/instrucción / (8 · 10⁶ ciclos/s) = 50 µs."
+        },
+        {
+          "type": "paragraph",
+          "text": "Si se usan interrupciones, en cada periodo habrá 50 µs de uso normal y 0,5 s de bajo\nconsumo luego la energía consumida es:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Eint = 50 · 10⁻⁶ s · 5000 ue/s + 0,5 · 1 ue/s = 0,25 + 0,5 = 0,75 ue.\nPor otra parte, si se usa espera activa, el procesador está en modo normal todo el\nperiodo:\n                     Eact = (0,5 + 50 · 10⁻⁶) s · 5000 ue/s = 2.500,25 ue.\nEl ahorro es entonces\n                 Ahorro = (2.500,25 − 0,75) / 2.500,25 · 100 % = 99,97 %."
+        },
+        {
+          "type": "paragraph",
+          "text": "Por otra parte, la duración de la batería es inversamente proporcional al consumo luego la\nbatería dura 2.500,25ue / 0,75ue ≈ 3.334 veces más."
+        }
+      ]
+    },
+    {
+      "id": "3.13",
+      "number": "3.13",
+      "origin": "Problema UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.13. Interrupciones múltiples. Una CPU tiene 4 líneas con prioridad PI₄ > PI₃\n> PI₂ > PI₁. Sus RSI duran PI₁: 4 ut, PI₂: 2 ut, PI₃: 3 ut y PI₄: 1 ut. Llegan peticiones en t =\n0 ut (PI₂), t = 1 ut (PI₁ y PI₃ a la vez) y t = 3 ut (PI₄). Determine el instante de finalización de\ncada RSI y dibuje el cronograma"
+        },
+        {
+          "type": "paragraph",
+          "text": "A) sin anidamiento"
+        },
+        {
+          "type": "paragraph",
+          "text": "B) con anidamiento."
+        },
+        {
+          "type": "paragraph",
+          "text": "En ambos casos considere que el tiempo de cambio de rutina es despreciable."
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nApartado A) Sin anidamiento. PI₂ que es la primera en llegar se ejecuta\nininterrumpidamente de 0 a 2 ut y PI₁ y PI₃ quedan retenidas. En t = 2 ut se atiende la más\nprioritaria pendiente, PI₃, de 2 a 5 ut. PI₄ llega en t = 3 ut y espera; se ejecuta de 5 a 6 ut.\nPor último, PI₁ de 6 a 10 ut."
+        },
+        {
+          "type": "paragraph",
+          "text": "Apartado B) Con anidamiento. PI₂ se ejecuta de 0 a 1 ut. En t = 1 PI₃ (más prioritaria)\nla interrumpe y PI₁ queda retenida. PI₃ se ejecuta de 1 a 3 ut, y en t = 3 ut la interrumpe PI₄,\nque va de 3 a 4 ut. Se reanuda PI₃ (le queda todavía 1 ut) y se ejecuta de 4 a 5 ut y termina,\ndespués continúa PI₂ (le queda 1 ut) de 5 a 6 ut y finalmente PI₁ de 6 a 10 ut."
+        },
+        {
+          "type": "paragraph",
+          "text": "A continuación, se muestran los tiempos de finalización y los cronogramas:"
+        },
+        {
+          "type": "paragraph",
+          "text": "RSI       Llegada (ut)      Fin sin anidamiento (ut)     Fin con anidamiento (ut)"
+        },
+        {
+          "type": "paragraph",
+          "text": "PI₄            3                       6                            4"
+        },
+        {
+          "type": "paragraph",
+          "text": "PI₃            1                       5                            5"
+        },
+        {
+          "type": "paragraph",
+          "text": "PI₂            0                       2                            6"
+        },
+        {
+          "type": "paragraph",
+          "text": "PI₁            1                      10                           10"
+        }
+      ]
+    },
+    {
+      "id": "3.14",
+      "number": "3.14",
+      "origin": "Problema UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.14. Una CPU tiene 8 líneas PI₁ > PI₂ > … > PI₈ (el bit más significativo es\nPI₁, donde 1 significa permitida y 0 inhibida), si en un instante dado llegan a la vez peticiones\npor PI₂, PI₄, PI₆ y PI₇."
+        },
+        {
+          "type": "paragraph",
+          "text": "A) Con la máscara A5₁₆ ¿Cuál se atiende?\n     B) ¿Qué máscara, en hexadecimal, permite únicamente PI₄?\n     C) Con enmascaramiento por nivel, el codificador asigna a PIj el nivel C = 9 − j. La\n         CPU en el instante actual está atendiendo la RSI de PI₅ con su nivel de prioridad y\n         el nivel anterior era A=0, si en ese momento llegan las mismas peticiones del\n         apartado A: PI₂, PI₄, PI₆ y PI₇. Indique en qué orden se atienden."
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nApartado A) A5₁₆ = 1010 0101₂ luego los bits de máscara son"
+        },
+        {
+          "type": "paragraph",
+          "text": "M₁ = 1, M₂ = 0, M₃ = 1, M₄ = 0, M₅ = 0, M₆ = 1, M₇ = 0, M₈ = 1."
+        },
+        {
+          "type": "paragraph",
+          "text": "Entonces, PI₂, PI₄ y PI₇ están bloqueadas (RE₂ = RE₄ = RE₇ = 1·0=0) Se atiende solo\nPI₆ (RE₆ = 1·1 = 1) aunque PI₂ y PI₄ sean más prioritarias."
+        },
+        {
+          "type": "paragraph",
+          "text": "Apartado B) Para permitir únicamente PI₄ basta con poner M₄ = 1 y el resto a cero, es\ndecir: 0001 0000₂ = 10₁₆."
+        },
+        {
+          "type": "paragraph",
+          "text": "Apartado C) Según la regla indicada las interrupciones establecen los siguientes\nniveles:"
+        },
+        {
+          "type": "paragraph",
+          "text": "PI₂ → C = 7, PI₄ → C = 5, PI₅ → C = 4, PI₆ → C = 3, PI₇ → C = 2"
+        },
+        {
+          "type": "paragraph",
+          "text": "La CPU está atendiendo PI5 a su nivel así que A=C=4. Al llegar las nuevas\ninterrupciones PI₂ (7 > 4) y PI₄ (5 > 4) pueden interrumpir y el codificador presenta primero\nla de mayor nivel: PI₂, que eleva A a 7 (nadie puede interrumpirla en ese momento)."
+        },
+        {
+          "type": "paragraph",
+          "text": "Al acabar vuelve A = 4 y entra PI₄. Después vuelve a A=4 y como no hay nadie más\nque pueda interrumpir se completa la RSI de PI₅. Al volver A=0, por debajo de 3 y 2 pueden\natenderse PI₆ y PI7, la primera en hacerlo es PI₆, que eleva A=3, al terminar vuelve a poner\nA=0 y se atiende PI₇. En resumen, el orden es: PI₂, PI₄, fin de PI₅, PI₆ y PI₇."
+        }
+      ]
+    },
+    {
+      "id": "3.15",
+      "number": "3.15",
+      "origin": "Problema UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.15. Seis periféricos comparten una línea PI y se encuestan en orden fijo del\n1 al 6. Consultar un periférico tarda 40 ns, el reconocimiento de la interrupción 60 ns y la\nRSI 300 ns."
+        },
+        {
+          "type": "paragraph",
+          "text": "A) Calcule el tiempo de atención en el mejor y en el peor caso.\n    B) Repítalo con múltiples líneas o MSI\n    C) Si el periférico 6 interrumpe cada 1µs, ¿qué fracción de CPU consume en cada\n        esquema?"
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nApartado A)"
+        },
+        {
+          "type": "paragraph",
+          "text": "-El mejor caso es el periférico 1 que solo necesita una encuesta y tarda"
+        },
+        {
+          "type": "paragraph",
+          "text": "60 + 1 · 40 + 300 = 400 ns."
+        },
+        {
+          "type": "paragraph",
+          "text": "-El peor caso es el periférico 6 que requiere 6 encuestas: 60 + 6 · 40 + 300 = 600 ns."
+        },
+        {
+          "type": "paragraph",
+          "text": "Apartado B)"
+        },
+        {
+          "type": "paragraph",
+          "text": "Con múltiples líneas o MSI la fuente se conoce sin consultar luego solo transcurre el tiempo\nde reconocimiento y la RSI: 60 + 300 = 360 ns para cualquier periférico."
+        },
+        {
+          "type": "paragraph",
+          "text": "Apartado C)"
+        },
+        {
+          "type": "paragraph",
+          "text": "Si se interrumpe cada microsegundo entonces hay 10⁶ interrupciones por segundo\nluego las sobrecargas son:"
+        },
+        {
+          "type": "paragraph",
+          "text": "-Encuesta: 10⁶ · 600 ns = 0,6 s por segundo, un 60 % de la CPU."
+        },
+        {
+          "type": "paragraph",
+          "text": "-Múltiples líneas: 10⁶ · 360 ns = 36 %."
+        },
+        {
+          "type": "paragraph",
+          "text": "Es importante destacar que la encuesta penaliza sobre todo a los periféricos consultados\nen último lugar."
+        }
+      ]
+    },
+    {
+      "id": "3.16",
+      "number": "3.16",
+      "origin": "Problema UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.16. Un disco transfiere 256 bytes por interrupción y el reconocimiento dura\n50ns."
+        },
+        {
+          "type": "paragraph",
+          "text": "A) Si la RSI dura 100 ns, ¿qué ancho de banda máximo se alcanza?\n    B) Si se quieren 2 GB/s con una CPU de 3 GHz y CPI = 2, ¿cuántas instrucciones\n        puede tener como máximo la RSI?"
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nApartado A)"
+        },
+        {
+          "type": "paragraph",
+          "text": "El tiempo por interrupción es:"
+        },
+        {
+          "type": "paragraph",
+          "text": "tI = tRI + tSI = 50ns + 100ns = 150 ns."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ancho de banda = 256 B / 150 ns = 1,71 GB/s."
+        },
+        {
+          "type": "paragraph",
+          "text": "Apartado B)"
+        },
+        {
+          "type": "paragraph",
+          "text": "Para tener 2 GB/s el tiempo entre interrupciones es"
+        },
+        {
+          "type": "paragraph",
+          "text": "tT = 256 B / (2 · 10⁹ B/s) = 128 ns"
+        },
+        {
+          "type": "paragraph",
+          "text": "Restando el tiempo de reconocimiento se obtiene:"
+        },
+        {
+          "type": "paragraph",
+          "text": "tSI = 128 − 50 = 78 ns."
+        },
+        {
+          "type": "paragraph",
+          "text": "La CPU ejecuta ve = (3 · 10⁹ ciclos/s) / (2 ciclos/instrucción) = 1,5 · 10⁹ instrucciones/s,\nde este modo el número máximo de instrucciones que pueden ejecutarse en tSI es"
+        },
+        {
+          "type": "paragraph",
+          "text": "N = 78 · 10⁻⁹ · 1,5 · 10⁹ = 117 instrucciones."
+        }
+      ]
+    },
+    {
+      "id": "3.17",
+      "number": "3.17",
+      "origin": "Problema UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.17. Un canal controla cuatro SSD de 200 MB/s y cuatro unidades de cinta\nde 40 MB/s. Transferir un byte del canal a memoria ocupa el bus 2 ns. Calcule la ocupación\nmáxima del bus y la velocidad efectiva si el canal es"
+        },
+        {
+          "type": "paragraph",
+          "text": "A) Selector\n     B) Multiplexor\n     C) ¿Qué tiempo de bus por byte evitaría la saturación en B)?"
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nApartado A) En el canal selector la velocidad es la del dispositivo más rápido: 200\nMB/s, así que tcanal = 1 B / (200 · 10⁶B/s) = 5 ns."
+        },
+        {
+          "type": "paragraph",
+          "text": "Entonces tT = máx{2, 5} = 5 ns y el porcentaje de uso es:"
+        },
+        {
+          "type": "paragraph",
+          "text": "P = 2 ns/ 5ns x 100% = 40 %"
+        },
+        {
+          "type": "paragraph",
+          "text": "Además la velocidad efectiva es de 200 MB/s."
+        },
+        {
+          "type": "paragraph",
+          "text": "Apartado B) Multiplexor. La velocidad es la suma de todos los dispositivos es decir v\n= 4 · 200 + 4 · 40 = 960 MB/s."
+        },
+        {
+          "type": "paragraph",
+          "text": "Entonces que tcanal = 1 B / (960 · 10⁶B/s) =1,04 ns."
+        },
+        {
+          "type": "paragraph",
+          "text": "tT = máx{2, 1,04} = 2 ns y finalmente P = 100 % es decir el bus está saturado y limita\nla velocidad efectiva a 1 B / 2 ns = 500 MB/s."
+        },
+        {
+          "type": "paragraph",
+          "text": "Apartado C) Para que no hubiese saturación tbus ≤ tcanal = 1,04 ns por byte."
+        }
+      ]
+    },
+    {
+      "id": "3.18",
+      "number": "3.18",
+      "origin": "Problema UNED",
+      "statement": [
+        {
+          "type": "paragraph",
+          "text": "Ejercicio 3.18. Un computador con CPU a 4 GHz (0,25 ns por instrucción), bus a 1 GHz\nde 8 bytes por ciclo muestra vídeo Full HD (1920 × 1080) con 32 bits por píxel a 60 fps y el\ncontrolador refresca la pantalla a 60 Hz."
+        },
+        {
+          "type": "paragraph",
+          "text": "A) Si la CPU calcula cada píxel con 20 instrucciones y comparte memoria con el\n        controlador, calcule la ocupación del bus y el uso de CPU.\n    B) Si en su lugar una GPU por PCIe (30 GB/s efectivos) recibe 100.000 órdenes de\n        dibujo de 64 bits por fotograma, que la CPU construye en su caché a 10 ciclos cada\n        una, calcule el uso de CPU."
+        }
+      ],
+      "solution": [
+        {
+          "type": "paragraph",
+          "text": "Solución:\nApartado A) CPU. El número de píxeles es 1920 · 1080 = 2.073.600 luego la memoria\nusada por el fotograma es 2.073.600 · 4 B = 8.294.400 B ≈ 8,3 MB."
+        },
+        {
+          "type": "paragraph",
+          "text": "Se transmiten 8 bytes en cada transferencia luego el número de transferencias de bus es\n8.294.400 / 8 = 1.036.800, que a 1 ns cada una son 1,037 ms por fotograma.\nCon estos datos podemos calcular el porcentaje de tiempo que consume cada parte del\nproceso:\n   1. Escritura de la CPU a 60 fps: 60 · 1,037 ms = 62,2 ms por segundo, un 6,22 % del\n      bus.\n   2. Lectura del controlador a 60 Hz, otro 6,22 %. Ocupación total del bus: 12,44%.\nPor otra parte, el uso de CPU será\n   1. El tiempo que se tarda en la escritura 6,22 %\n   2. El tiempo de cálculo de un fotograma: 2.073.600 · 20 · 0,25 ns = 10,37 ms, que a\n      60 fps son 60x10,37 ms/s =622 ms por segundo, es decir un 62,2 % de CPU.\n   3. Uso total de CPU (cálculo + escritura): 62,2 + 6,22 = 68,4 %."
+        },
+        {
+          "type": "paragraph",
+          "text": "Apartado B) GPU por PCIe. En este caso los datos a escribir por fotograma son"
+        },
+        {
+          "type": "paragraph",
+          "text": "100.000 órdenes · 8 B/orden= 0,8 MB.\nDe este modo el tiempo de transmisión es 0,8 MB / 30 GB/s = 26,7 µs y a 60 fps resulta\n                        60x 26,7 µs=1,6 ms por segundo = 0,16 %.\nPor otra parte, la CPU ha de construir las órdenes lo que consume\n                100.000 órdenes· 10 ciclos/orden · 0,25 ns/ciclo = 0,25 ms\nLuego a 60 fps, se tarda 60x0,25 ms=15 ms por segundo = 1,5 %.\nSumando ambas cosas el uso de CPU es un 1,66 %, mucho mejor que el 68,4 % del\napartado A)."
+        }
+      ]
+    }
+  ]
+}

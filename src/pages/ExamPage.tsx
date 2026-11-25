@@ -38,20 +38,20 @@ export function ExamPage() {
 
   return (
     <div className="page-shell exam-home">
-      <PageHeader title="Prepara el examen resolviendo." description="Quince problemas nuevos de desarrollo, con soluciones aparte y un simulacro en las condiciones de tiempo de la prueba presencial." aside={<span className="collection-stamp red">15<br /><small>ejercicios</small></span>} />
+      <PageHeader title="Prepara el examen resolviendo." description="Veinticinco problemas nuevos de desarrollo repartidos por los cuatro temas del Bloque I, con soluciones aparte y un simulacro en las condiciones reales de la prueba presencial." aside={<span className="collection-stamp red">{examExercises.length}<br /><small>ejercicios</small></span>} />
       <section className="exam-start-panel">
         <div className="exam-clock-art"><AlarmClock strokeWidth={1.25} /><span>120<small>min</small></span></div>
-        <div><h2>Simulacro de cinco posiciones</h2><p>Cinco ejercicios aleatorios del banco. Escribe tu desarrollo, gestiona el tiempo y comprueba las soluciones al terminar.</p>
+        <div><h2>Simulacro de cinco posiciones</h2><p>Cinco ejercicios aleatorios del banco completo (Temas 1 a 4). Escribe tu desarrollo, gestiona el tiempo y comprueba las soluciones al terminar.</p>
           <ul className="inline-facts"><li>Sin apuntes</li><li>Desarrollo completo</li><li>Calculadora no programable</li></ul>
         </div>
         <button className="button button-primary" onClick={start}><Play size={18} /> Comenzar simulacro</button>
       </section>
       <div className="exam-mode-links">
-        <Link to="/examen/ejercicios"><span><strong>Entrenar sin reloj</strong><small>Los 15 enunciados, ordenados por tema.</small></span><ArrowRight /></Link>
+        <Link to="/examen/ejercicios"><span><strong>Entrenar sin reloj</strong><small>Los {examExercises.length} enunciados, filtrables por tema.</small></span><ArrowRight /></Link>
         <Link to="/examen/soluciones"><span><strong>Consultar soluciones</strong><small>Procedimientos y resultados, en otra colección.</small></span><ArrowRight /></Link>
       </div>
       <section className="exam-index">
-        <div className="section-heading"><div><h2>Contenido del banco</h2><p>Nueve ejercicios del Tema 1 y seis del Tema 2.</p></div><span className="origin-label">Repaso no oficial</span></div>
+        <div className="section-heading"><div><h2>Contenido del banco</h2><p>10 del Tema 1 · 8 del Tema 2 · 4 del Tema 3 · 3 del Tema 4.</p></div><span className="origin-label">Repaso no oficial</span></div>
         {examExercises.map((exercise) => <Link to={`/examen/ejercicios#${exercise.id}`} key={exercise.id}><span>{exercise.id}</span><strong>{exercise.title}</strong><small>Tema {exercise.topic} · {exercise.level}</small><ChevronRight size={18} /></Link>)}
       </section>
     </div>
@@ -59,7 +59,7 @@ export function ExamPage() {
 }
 
 export function ExamExercisesPage({ solutions }: { solutions: boolean }) {
-  const [filter, setFilter] = useState<0 | 1 | 2>(0);
+  const [filter, setFilter] = useState<0 | 1 | 2 | 3 | 4>(0);
   const [visible, setVisible] = useState<string[]>([]);
   const [answers, setAnswers] = useLocalStorage<Record<string, string>>('fc-exam-answers-v1', {});
   const { completedExercises, toggle } = useProgress();
@@ -68,10 +68,16 @@ export function ExamExercisesPage({ solutions }: { solutions: boolean }) {
   return (
     <div className="page-shell exercises-page">
       <Link className="back-link" to="/examen"><ArrowLeft size={16} /> Preparación del examen</Link>
-      <PageHeader title={solutions ? 'Soluciones del banco' : 'Banco tipo examen'} description={solutions ? 'Las quince resoluciones, con operaciones y razonamiento. Úsalas para corregir tu propio desarrollo.' : 'Quince problemas originales de desarrollo. Escribe tu resolución antes de abrir la colección de soluciones.'} aside={<span className="origin-label">Material de repaso</span>} />
+      <PageHeader title={solutions ? 'Soluciones del banco' : 'Banco tipo examen'} description={solutions ? 'Las veinticinco resoluciones completas, con operaciones y razonamiento. Úsalas para corregir tu propio desarrollo.' : 'Veinticinco problemas originales de desarrollo para los Temas 1 a 4. Escribe tu resolución antes de abrir la colección de soluciones.'} aside={<span className="origin-label">Material de repaso</span>} />
       <div className="exercise-toolbar">
         <div className="segmented-control"><Link className={!solutions ? 'active' : ''} to="/examen/ejercicios">Enunciados</Link><Link className={solutions ? 'active' : ''} to="/examen/soluciones">Soluciones</Link></div>
-        <div className="filter-tabs" aria-label="Filtrar por tema">{([0, 1, 2] as const).map((topic) => <button className={filter === topic ? 'active' : ''} key={topic} onClick={() => setFilter(topic)}>{topic === 0 ? 'Todos' : `Tema ${topic}`}</button>)}</div>
+        <div className="filter-tabs" aria-label="Filtrar por tema">
+          {([0, 1, 2, 3, 4] as const).map((topic) => (
+            <button className={filter === topic ? 'active' : ''} key={topic} onClick={() => setFilter(topic)}>
+              {topic === 0 ? 'Todos' : `Tema ${topic}`}
+            </button>
+          ))}
+        </div>
         <button className="icon-button" onClick={() => window.print()} aria-label="Imprimir banco"><Printer size={19} /></button>
       </div>
       <div className="exercise-list">

@@ -14,8 +14,8 @@ async function loadJson<T>(path: string): Promise<T | null> {
 }
 
 export function CourseProvider({ children }: { children: ReactNode }) {
-  const [topics, setTopics] = useState<Record<number, Topic | null>>({ 1: null, 2: null });
-  const [exercises, setExercises] = useState<ExerciseDocument | null>(null);
+  const [topics, setTopics] = useState<Record<number, Topic | null>>({ 1: null, 2: null, 3: null, 4: null });
+  const [exercisesByTopic, setExercisesByTopic] = useState<Record<number, ExerciseDocument | null>>({ 1: null, 2: null, 3: null });
   const [sources, setSources] = useState<SourceDocument[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,12 +24,16 @@ export function CourseProvider({ children }: { children: ReactNode }) {
     void Promise.all([
       loadJson<Topic>('./content/topic-1.json'),
       loadJson<Topic>('./content/topic-2.json'),
+      loadJson<Topic>('./content/topic-3.json'),
+      loadJson<Topic>('./content/topic-4.json'),
       loadJson<ExerciseDocument>('./content/exercises-1.json'),
+      loadJson<ExerciseDocument>('./content/exercises-2.json'),
+      loadJson<ExerciseDocument>('./content/exercises-3.json'),
       loadJson<SourcesFile>('./content/sources.json'),
-    ]).then(([topic1, topic2, exerciseData, sourceData]) => {
+    ]).then(([t1, t2, t3, t4, ex1, ex2, ex3, sourceData]) => {
       if (!active) return;
-      setTopics({ 1: topic1, 2: topic2 });
-      setExercises(exerciseData);
+      setTopics({ 1: t1, 2: t2, 3: t3, 4: t4 });
+      setExercisesByTopic({ 1: ex1, 2: ex2, 3: ex3 });
       setSources(sourceData?.documents ?? []);
       setLoading(false);
     });
@@ -37,7 +41,7 @@ export function CourseProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <CourseContext.Provider value={{ topics, exercises, sources, loading, available: Boolean(topics[1] && topics[2]) }}>
+    <CourseContext.Provider value={{ topics, exercisesByTopic, sources, loading, available: Boolean(topics[1] && topics[2] && topics[3] && topics[4]) }}>
       {children}
     </CourseContext.Provider>
   );

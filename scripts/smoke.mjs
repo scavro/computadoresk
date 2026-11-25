@@ -1,5 +1,5 @@
 // Smoke test end-to-end: sirve dist/ con `vite preview` y comprueba rutas,
-// tema claro/oscuro, búsqueda por deep-link y overflow en desktop/móvil.
+// tema claro/oscuro, figuras, portadas, búsqueda y overflow en desktop/móvil.
 // Uso: npm run smoke   (requiere `npm run build` previo)
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
@@ -38,26 +38,34 @@ try {
 
   await check('landing', '/');
   const lightBg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  console.log(`light body background: ${lightBg}`);
   if (lightBg === 'rgba(0, 0, 0, 0)' || lightBg === 'rgb(0, 0, 0)') errors.push(`[theme] fondo claro inválido: ${lightBg}`);
 
   await page.evaluate(() => localStorage.setItem('fc-theme', 'dark'));
   await page.reload({ waitUntil: 'networkidle' });
   const darkBg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  console.log(`dark body background: ${darkBg}`);
   if (darkBg === lightBg) errors.push('[theme] el modo oscuro no cambió el fondo');
   await page.evaluate(() => localStorage.setItem('fc-theme', 'light'));
 
-  await check('apuntes T1', '/#/temas/1');
-  if (await page.locator('.reading-sheet').count() === 0) errors.push('[content] Tema 1 sin secciones');
-  await check('apuntes T2', '/#/temas/2');
-  if (await page.locator('.reading-sheet').count() === 0) errors.push('[content] Tema 2 sin secciones');
-  await check('ejercicios', '/#/ejercicios/tema-1');
-  if (await page.locator('.exercise-sheet').count() !== 27) errors.push('[content] no se muestran los 27 ejercicios');
-  await check('soluciones', '/#/ejercicios/tema-1/soluciones');
-  if (await page.locator('.exercise-sheet').count() !== 27) errors.push('[content] no se muestran las 27 soluciones');
-  const pdf = await page.request.get(`${BASE}/fuentes/tema-1.pdf`);
-  if (!pdf.ok() || !(await pdf.body()).subarray(0, 5).equals(Buffer.from('%PDF-'))) errors.push('[content] PDF del Tema 1 ausente');
+  for (const t of [1, 2, 3, 4]) {
+    await check(`apuntes T${t}`, `/#/temas/${t}`);
+    if (await page.locator('.reading-sheet').count() === 0) errors.push(`[content] Tema ${t} sin secciones`);
+    if (await page.locator('.course-figure img').count() === 0) errors.push(`[figures] Tema ${t} sin figuras`);
+    const pdf = await page.request.get(`${BASE}/fuentes/tema-${t}.pdf`);
+    if (!pdf.ok() || !(await pdf.body()).subarray(0, 5).equals(Buffer.from('%PDF-'))) errors.push(`[content] PDF del Tema ${t} ausente`);
+  }
+
+  await check('ejercicios T1', '/#/ejercicios/tema-1');
+  if (await page.locator('.exercise-sheet').count() !== 27) errors.push('[content] T1 no muestra 27 ejercicios');
+  await check('soluciones T1', '/#/ejercicios/tema-1/soluciones');
+  if (await page.locator('.exercise-sheet').count() !== 27) errors.push('[content] T1 no muestra 27 soluciones');
+
+  await check('ejercicios T2', '/#/ejercicios/tema-2');
+  if (await page.locator('.exercise-sheet').count() !== 46) errors.push('[content] T2 no muestra 46 ejercicios');
+  if (await page.locator('.quiz-card').count() !== 10) errors.push('[content] T2 no muestra las 10 preguntas del test de caché');
+
+  await check('ejercicios T3', '/#/ejercicios/tema-3');
+  if (await page.locator('.exercise-sheet').count() !== 18) errors.push('[content] T3 no muestra 18 ejercicios');
+
   await check('examen', '/#/examen');
   await page.getByRole('button', { name: 'Comenzar simulacro' }).click();
   await page.locator('textarea').first().fill('Mi respuesta');
@@ -65,24 +73,26 @@ try {
   if (!(await page.locator('textarea').first().evaluate((el) => el.readOnly))) errors.push('[simulacro] respuestas editables tras finalizar');
   await page.reload({ waitUntil: 'networkidle' });
   if (!(await page.locator('textarea').first().evaluate((el) => el.readOnly)) || await page.locator('textarea').first().inputValue() !== 'Mi respuesta') errors.push('[simulacro] estado final no persistido');
+
   await check('ejercicios examen', '/#/examen/ejercicios');
-  // Los enunciados de examen llevan fórmulas $...$ en data/exam.ts: KaTeX debe renderizarlas.
   const mathCount = await page.locator('.katex').count();
-  console.log(`fórmulas KaTeX en ejercicios de examen: ${mathCount}`);
   if (mathCount === 0) errors.push('[katex] no se renderizó ninguna fórmula en los ejercicios de examen');
+
   await check('practicas', '/#/practicas');
   await check('practica bases', '/#/practicas/bases');
-  await check('practica memoria 3D', '/#/practicas/memoria');
+  await check('practica cache', '/#/practicas/cache');
+  await check('practica hdd 3D', '/#/practicas/hdd');
+  await check('practica es-dma', '/#/practicas/es-dma');
+  await check('practica cpu-pipeline', '/#/practicas/cpu-pipeline');
   await check('guia', '/#/guia');
   await check('fuentes', '/#/fuentes');
-  await check('buscador', '/#/buscar?q=complemento');
+  await check('buscador', '/#/buscar?q=cache');
 
   const results = await page.locator('main a').count();
-  console.log(`search results for "complemento": ${results}`);
-  if (results < 3) errors.push(`[search] pocos resultados: ${results}`);
+  if (results < 5) errors.push(`[search] pocos resultados para cache: ${results}`);
 
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const url of ['/', '/#/temas/1', '/#/practicas', '/#/examen']) {
+  for (const url of ['/', '/#/temas/2', '/#/ejercicios/tema-2', '/#/practicas', '/#/practicas/cache', '/#/practicas/cpu-pipeline', '/#/examen']) {
     await page.goto(`${BASE}${url}`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(200);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);

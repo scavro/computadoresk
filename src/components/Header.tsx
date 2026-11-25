@@ -1,18 +1,19 @@
 import { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { BookOpen, Github, Menu, Moon, Search, Sun, X } from 'lucide-react';
 import { useTheme } from '../context/theme';
 
 const links = [
-  { to: '/temas/1', label: 'Apuntes' },
-  { to: '/ejercicios/tema-1', label: 'Ejercicios' },
-  { to: '/examen', label: 'Examen' },
-  { to: '/practicas', label: 'Prácticas' },
+  { to: '/temas/1', matchPrefix: '/temas', label: 'Apuntes' },
+  { to: '/ejercicios/tema-1', matchPrefix: '/ejercicios', label: 'Ejercicios' },
+  { to: '/examen', matchPrefix: '/examen', label: 'Examen' },
+  { to: '/practicas', matchPrefix: '/practicas', label: 'Prácticas' },
 ];
 
 export function Header() {
   const [open, setOpen] = useState(false);
   const { theme, toggle } = useTheme();
+  const { pathname } = useLocation();
 
   return (
     <header className="site-header">
@@ -26,11 +27,16 @@ export function Header() {
       </Link>
       <nav className={open ? 'main-nav is-open' : 'main-nav'} aria-label="Navegación principal">
         {links.map((link) => (
-          <NavLink key={link.to} to={link.to} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>
+          <NavLink
+            key={link.to}
+            to={link.to}
+            onClick={() => setOpen(false)}
+            className={pathname.startsWith(link.matchPrefix) ? 'active' : ''}
+          >
             {link.label}
           </NavLink>
         ))}
-        <NavLink to="/guia" onClick={() => setOpen(false)}>Guía</NavLink>
+        <NavLink to="/guia" onClick={() => setOpen(false)} className={({ isActive }) => isActive ? 'active' : ''}>Guía</NavLink>
       </nav>
       <div className="header-actions">
         <button className="icon-button theme-toggle" type="button" onClick={toggle} aria-label={theme === 'light' ? 'Activar modo oscuro' : 'Activar modo claro'}>{theme === 'light' ? <Moon size={19} /> : <Sun size={19} />}</button>

@@ -1,9 +1,11 @@
-export type BlockType = 'paragraph' | 'pre' | 'heading' | 'example' | 'note' | 'caption';
+export type BlockType = 'paragraph' | 'pre' | 'heading' | 'example' | 'note' | 'caption' | 'figure';
 
 export interface ContentBlock {
   type: BlockType;
   text: string;
   title?: string;
+  src?: string;
+  alt?: string;
 }
 
 export interface TopicSection {
@@ -11,6 +13,7 @@ export interface TopicSection {
   number: string;
   title: string;
   page: number;
+  pdfPage?: number;
   blocks: ContentBlock[];
 }
 
@@ -26,14 +29,24 @@ export interface Topic {
 export interface CourseExercise {
   id: string;
   number: string;
+  origin?: string;
   page?: number;
   statement: ContentBlock[] | string;
   solution: ContentBlock[] | string;
 }
 
+export interface CacheQuizItem {
+  id: string;
+  question: string;
+  options: string[];
+  correct: number;
+  explanation: string;
+}
+
 export interface ExerciseDocument {
   topic: number;
   exercises: CourseExercise[];
+  quiz?: CacheQuizItem[];
 }
 
 export interface SourceDocument {

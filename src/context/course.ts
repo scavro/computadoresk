@@ -3,7 +3,7 @@ import type { ExerciseDocument, SourceDocument, Topic } from '../types';
 
 export interface CourseContextValue {
   topics: Record<number, Topic | null>;
-  exercises: ExerciseDocument | null;
+  exercisesByTopic: Record<number, ExerciseDocument | null>;
   sources: SourceDocument[];
   loading: boolean;
   available: boolean;

@@ -1,29 +1,10 @@
 import { useLayoutEffect, useRef } from 'react';
 import type { MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Check, ChevronRight, FlaskConical, PencilLine } from 'lucide-react';
+import { ArrowRight, BookOpen, Check, ChevronRight, FileText, FlaskConical, PencilLine } from 'lucide-react';
 import gsap from 'gsap';
 import { futureTopics, topicMeta } from '../data/course';
 import { useProgress } from '../context/progress';
-
-function TopicArt({ topic }: { topic: number }) {
-  if (topic === 1) {
-    return (
-      <svg viewBox="0 0 220 145" aria-hidden="true">
-        <path d="M22 28h176v91H22zM38 45h62v57H38zM119 45h62v15h-62zM119 72h62v30h-62z" />
-        <path d="M52 28V15m22 13V15m22 13V15m22 13V15m22 13V15m22 13V15M52 119v14m22-14v14m22-14v14m22-14v14m22-14v14m22-14v14" />
-        <text x="48" y="78">01</text><text x="130" y="57">10</text><text x="130" y="92">11</text>
-      </svg>
-    );
-  }
-  return (
-    <svg viewBox="0 0 220 145" aria-hidden="true">
-      <path d="M35 17h150v112H35zM52 35h116v74H52z" />
-      <path d="M62 46h22v22H62zm32 0h22v22H94zm32 0h22v22h-22zM62 78h22v22H62zm32 0h22v22H94zm32 0h22v22h-22z" />
-      <path d="M46 17V8m18 9V8m18 9V8m18 9V8m18 9V8m18 9V8m18 9V8m18 9V8M46 129v9m18-9v9m18-9v9m18-9v9m18-9v9m18-9v9m18-9v9m18-9v9" />
-    </svg>
-  );
-}
 
 function MiniArt({ kind }: { kind: 'exercises' | 'exam' | 'practice' }) {
   if (kind === 'practice') {
@@ -33,6 +14,22 @@ function MiniArt({ kind }: { kind: 'exercises' | 'exam' | 'practice' }) {
     return <svg viewBox="0 0 120 90" aria-hidden="true"><circle cx="60" cy="45" r="31" /><path d="M60 25v21l15 9M42 9h36M60 9v8" /></svg>;
   }
   return <svg viewBox="0 0 120 90" aria-hidden="true"><path d="M31 14h58v62H31zM42 30h35M42 43h35M42 56h23M24 21h7M24 69h7" /><path d="m72 62 22-22 8 8-22 22-11 3z" /></svg>;
+}
+
+function CircuitTrace() {
+  return (
+    <svg className="circuit-trace" viewBox="0 0 360 26" aria-hidden="true">
+      <line x1="8" y1="6" x2="295" y2="6" stroke="currentColor" strokeWidth="1" opacity="0.45" />
+      <line x1="8" y1="6" x2="54" y2="6" stroke="currentColor" strokeWidth="2.2" />
+      <circle cx="298" cy="6" r="2.6" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <line x1="8" y1="13" x2="338" y2="13" stroke="currentColor" strokeWidth="1" opacity="0.45" />
+      <line x1="8" y1="13" x2="88" y2="13" stroke="currentColor" strokeWidth="2.2" />
+      <circle cx="341" cy="13" r="2.8" fill="currentColor" />
+      <line x1="8" y1="20" x2="272" y2="20" stroke="currentColor" strokeWidth="1" opacity="0.45" />
+      <line x1="8" y1="20" x2="36" y2="20" stroke="currentColor" strokeWidth="2.2" />
+      <circle cx="275" cy="20" r="2.4" fill="none" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
 }
 
 function pressSticker(event: MouseEvent<HTMLAnchorElement>) {
@@ -49,7 +46,7 @@ export function HomePage() {
     const context = gsap.context(() => {
       gsap.from('.hero-copy > *', { y: 22, opacity: 0, duration: 0.65, stagger: 0.08, ease: 'power3.out' });
       gsap.from('.album-spread', { clipPath: 'inset(0 48% 0 48%)', duration: 1, ease: 'power4.inOut', delay: 0.12 });
-      gsap.from('.album-spread .sticker', { scale: 1.08, y: -10, duration: 0.55, stagger: 0.07, ease: 'back.out(1.8)', delay: 0.8 });
+      gsap.from('.album-spread .sticker', { scale: 1.06, y: -8, duration: 0.5, stagger: 0.05, ease: 'back.out(1.8)', delay: 0.75 });
     }, root);
     return () => context.revert();
   }, []);
@@ -60,29 +57,38 @@ export function HomePage() {
         <div className="hero-copy">
           <div className="edition-tag">UNED · INGENIERÍA EN IA · 2026/27</div>
           <h1>Tu mapa para entender el computador.</h1>
-          <p>Apuntes completos, ejercicios resueltos y laboratorios para aprender haciendo. Todo el curso, en un solo álbum.</p>
+          <p>El Bloque I completo de Hardware reunido en un solo álbum: apuntes con figuras y portadas, 91 ejercicios resueltos, banco de examen y laboratorios 2D y 3D.</p>
           <div className="hero-actions">
             <button className="button button-primary" onClick={() => document.getElementById('mapa')?.scrollIntoView({ behavior: 'smooth' })}>
               Abrir el álbum <ArrowRight size={19} />
             </button>
             <Link className="button button-secondary" to="/examen">Preparar el examen</Link>
           </div>
-          <div className="local-note"><span /> Funciona en local. Tu progreso se queda en tu navegador.</div>
+          <CircuitTrace />
+          <div className="local-note"><span /> Funciona en cualquier dispositivo. Tu progreso queda guardado en tu navegador.</div>
         </div>
 
         <div className="album-stage" aria-label="Mapa visual del curso">
           <div className="album-spread">
             <div className="album-page album-page-left">
-              <div className="album-page-title"><span>Bloque I</span><strong>Hardware</strong></div>
-              {topicMeta.map((topic) => (
-                <Link key={topic.id} to={`/temas/${topic.id}`} className={`sticker topic-sticker sticker-${topic.color}`} onClick={pressSticker}>
-                  <span className="slot-number">0{topic.id}</span>
-                  <TopicArt topic={topic.id} />
-                  <span className="sticker-copy"><strong>{topic.shortTitle}</strong><small>{topic.id === 1 ? 'Tema completo' : 'Parte 1 disponible'}</small></span>
-                </Link>
-              ))}
-              <div className="ghost-row">
-                {futureTopics.slice(0, 2).map((topic) => <div className="ghost-slot" key={topic.id}><span>0{topic.id}</span><small>Pendiente</small></div>)}
+              <div className="album-page-title"><span>Bloque I completo</span><strong>Hardware</strong></div>
+              <div className="topic-grid-4">
+                {topicMeta.map((topic) => (
+                  <Link key={topic.id} to={`/temas/${topic.id}`} className={`sticker topic-sticker-compact sticker-${topic.color}`} onClick={pressSticker}>
+                    <span className="slot-number">0{topic.id}</span>
+                    <div className="sticker-cover-wrap">
+                      <img src={topic.cover} alt={`Portada Tema ${topic.id}`} loading="lazy" />
+                    </div>
+                    <span className="sticker-copy">
+                      <strong>{topic.shortTitle}</strong>
+                      <small>{topic.pages} págs. · Tema completo</small>
+                    </span>
+                  </Link>
+                ))}
+              </div>
+              <div className="ghost-row" aria-label="Bloque II pendiente de publicación">
+                <div className="ghost-slot"><span>B-II</span><small>Temas 05–07 · Sistemas operativos</small></div>
+                <div className="ghost-slot"><span>B-II</span><small>Temas 08–10 · Memoria, E/S y archivos</small></div>
               </div>
             </div>
             <div className="album-seam" />
@@ -90,40 +96,68 @@ export function HomePage() {
               <div className="album-page-title"><span>Tu colección</span><strong>Práctica</strong></div>
               <Link to="/ejercicios/tema-1" className="sticker mini-sticker" onClick={pressSticker}>
                 <span className="slot-number">A1</span><MiniArt kind="exercises" />
-                <span className="sticker-copy"><strong>27 ejercicios</strong><small>Con soluciones</small></span>
+                <span className="sticker-copy"><strong>91 ejercicios</strong><small>Temas 1–3 y test de caché</small></span>
               </Link>
               <Link to="/examen" className="sticker mini-sticker sticker-red" onClick={pressSticker}>
                 <span className="slot-number">E1</span><MiniArt kind="exam" />
-                <span className="sticker-copy"><strong>Tipo examen</strong><small>15 problemas nuevos</small></span>
+                <span className="sticker-copy"><strong>Tipo examen</strong><small>25 problemas de desarrollo</small></span>
               </Link>
               <Link to="/practicas" className="sticker mini-sticker sticker-gold" onClick={pressSticker}>
                 <span className="slot-number">P1</span><MiniArt kind="practice" />
-                <span className="sticker-copy"><strong>Laboratorio</strong><small>8 prácticas interactivas</small></span>
+                <span className="sticker-copy"><strong>Laboratorio</strong><small>12 prácticas 2D y 3D</small></span>
               </Link>
               <div className="album-caption">Lee. Prueba. Comprueba.</div>
             </div>
           </div>
-          <div className="album-tab">Colección FC–01</div>
+          <div className="album-tab">Colección FC · Bloque I</div>
+        </div>
+      </section>
+
+      <section className="covers-showcase" aria-label="Cuadernos encuadernados del Bloque I">
+        <div className="section-heading">
+          <div>
+            <h2>Cuadernos y portadas del Bloque I</h2>
+            <p>Accede al lector interactivo de cada tema o abre su PDF encuadernado con portada.</p>
+          </div>
+          <a className="collection-count" href="./fuentes/portadas.pdf" target="_blank" rel="noreferrer">Portadas PDF</a>
+        </div>
+        <div className="covers-strip">
+          <a className="cover-card cover-card-general" href="./fuentes/portadas.pdf" target="_blank" rel="noreferrer">
+            <img src="./covers/portada-general.webp" alt="Portada general de Fundamentos de Computadores" loading="lazy" />
+            <div><span>Portada general</span><strong>Fundamentos de Computadores</strong></div>
+          </a>
+          {topicMeta.map((topic) => (
+            <Link key={topic.id} className="cover-card" to={`/temas/${topic.id}`}>
+              <img src={topic.cover} alt={`Portada del Tema ${topic.id}`} loading="lazy" />
+              <div>
+                <span>Tema {topic.id} · {topic.pages} págs.</span>
+                <strong>{topic.shortTitle}</strong>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
 
       <section className="collection-section" id="mapa">
         <div className="section-heading">
-          <div><h2>Elige tu próxima posición</h2><p>Cada parte del álbum tiene una función distinta.</p></div>
-          <span className="collection-count">2 temas disponibles</span>
+          <div><h2>Elige tu próxima posición</h2><p>Cada parte del álbum tiene una función distinta y enlaza con el resto.</p></div>
+          <span className="collection-count">4 temas completos · {futureTopics.length} de SO futuros</span>
         </div>
         <div className="collection-ledger">
           <Link to="/temas/1" className="ledger-row">
-            <span className="ledger-icon"><BookOpen /></span><span><strong>Apuntes</strong><small>Los dos primeros temas, con figuras, ejemplos y referencias al PDF.</small></span><ChevronRight />
+            <span className="ledger-icon"><BookOpen /></span><span><strong>Apuntes del Bloque I (Temas 1 a 4)</strong><small>Representación, unidad de memoria y caché, entrada/salida y procesador (CPU/GPU/NPU), con figuras y enlaces al PDF.</small></span><ChevronRight />
           </Link>
           <Link to="/ejercicios/tema-1" className="ledger-row">
-            <span className="ledger-icon"><PencilLine /></span><span><strong>Ejercicios y soluciones</strong><small>Primero resuelve; después contrasta el procedimiento completo.</small></span><ChevronRight />
+            <span className="ledger-icon"><PencilLine /></span><span><strong>Ejercicios oficiales y soluciones</strong><small>27 del Tema 1, 46 + cuestionario interactivo de caché del Tema 2 y 18 del Tema 3.</small></span><ChevronRight />
           </Link>
           <Link to="/examen" className="ledger-row">
-            <span className="ledger-icon"><span className="ledger-number">15</span></span><span><strong>Banco tipo examen</strong><small>Problemas nuevos y un simulacro de cinco ejercicios en 120 minutos.</small></span><ChevronRight />
+            <span className="ledger-icon"><span className="ledger-number">25</span></span><span><strong>Banco tipo examen</strong><small>Problemas nuevos de los cuatro temas y simulacro cronometrado de cinco ejercicios en 120 minutos.</small></span><ChevronRight />
           </Link>
           <Link to="/practicas" className="ledger-row">
-            <span className="ledger-icon"><FlaskConical /></span><span><strong>Prácticas interactivas</strong><small>Conversores, memoria, buses y un constructor 3D de ampliaciones.</small></span><ChevronRight />
+            <span className="ledger-icon"><FlaskConical /></span><span><strong>Prácticas interactivas 2D y 3D</strong><small>Conversores, memoria 3D, disco duro magnético 3D en Three.js, simulador de caché, DMA y pipeline RISC.</small></span><ChevronRight />
+          </Link>
+          <Link to="/fuentes" className="ledger-row">
+            <span className="ledger-icon"><FileText /></span><span><strong>Documentos y PDFs con portada</strong><small>Los 14 documentos originales y cuadernos encuadernados listos para descargar o imprimir.</small></span><ChevronRight />
           </Link>
         </div>
       </section>

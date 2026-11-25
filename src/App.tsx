@@ -55,8 +55,9 @@ function AppRoutes() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/temas/:topicId" element={<TopicPage />} />
-          <Route path="/ejercicios/tema-1" element={<ExercisesPage solutions={false} />} />
-          <Route path="/ejercicios/tema-1/soluciones" element={<ExercisesPage solutions />} />
+          <Route path="/ejercicios" element={<Navigate to="/ejercicios/tema-1" replace />} />
+          <Route path="/ejercicios/:topicSlug" element={<ExercisesPage solutions={false} />} />
+          <Route path="/ejercicios/:topicSlug/soluciones" element={<ExercisesPage solutions />} />
           <Route path="/examen" element={<ExamPage />} />
           <Route path="/examen/ejercicios" element={<ExamExercisesPage solutions={false} />} />
           <Route path="/examen/soluciones" element={<ExamExercisesPage solutions />} />
